@@ -1,0 +1,937 @@
+/* beeson.css, the reveal.js theme of the Beeson group. Design size 1920 by 1080, Latin Modern
+   Roman, black by default with a warm paper light mode. The layout classes are documented in
+   index.html. */
+
+:root,
+html[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #050505;
+  --text: #f2f2ef;
+  --subtle: #a6a6a0;
+  --muted: #7c7c76;
+  --line: #232320;
+  --accent: #f08050;
+  --violet: #c94fe6;
+  /* the tones blue and red of a highlight, e.g. of the terms drawn on a surface in Blues and Reds */
+  --blue: #4f9df5;
+  --red: #ff4d4d;
+  --stroke: rgba(242, 242, 239, 0.34);
+  --body: rgba(242, 242, 239, 0.55);
+  /* the palette of a backdrop drawn from a file, in pairs: a value of data-trajectories-color takes
+     --trajectory-1 and --trajectory-2, the next value --trajectory-3 and --trajectory-4, and so on, and a trajectory is
+     colored between the two along data-trajectories-ramp. in each mode, every color is drawn at the
+     opacity 0.6 of a trajectory with a contrast of at least 2.5:1 against --bg, as test/trajectories.test.mjs
+     checks */
+  --trajectory-1: #c94fe6;
+  --trajectory-2: #f08050;
+  --trajectory-3: #3d8bff;
+  --trajectory-4: #2fd4c0;
+  --trajectory-5: #ffd23f;
+  --trajectory-6: #8fdc5a;
+  --trajectory-7: #6f7cff;
+  --trajectory-8: #f2f2ef;
+  --text-column: #050505;
+  --text-column-text: #f2f2ef;
+  --text-column-subtle: #a6a6a0;
+  --white-figure: #ffffff;
+  /* a QR code is drawn dark on a light tile in both modes, since many scanners do not read an
+     inverted code */
+  --qr-ink: #050505;
+  --qr-tile: #f2f2ef;
+  /* the eyes of its finder patterns are in the violet of the light mode in both modes, for its
+     contrast on the tile */
+  --qr-eye: #8a2be2;
+}
+html[data-theme="light"] {
+  color-scheme: light;
+  --bg: #faf8f3;
+  --text: #141413;
+  --subtle: #55554f;
+  --muted: #8a8a84;
+  --line: #e3e0d8;
+  --accent: #c8571e;
+  --violet: #8a2be2;
+  --blue: #1f5fd0;
+  --red: #c41e1e;
+  --stroke: rgba(20, 20, 19, 0.3);
+  --body: rgba(20, 20, 19, 0.5);
+  --trajectory-1: #8a2be2;
+  --trajectory-2: #b24500;
+  --trajectory-3: #1f5fd0;
+  --trajectory-4: #006c5f;
+  --trajectory-5: #7e5a00;
+  --trajectory-6: #356f00;
+  --trajectory-7: #3b3fb0;
+  --trajectory-8: #141413;
+  --qr-ink: #141413;
+  --qr-tile: var(--bg);
+}
+/* the Okabe–Ito set for data, the same in both modes */
+:root {
+  --data-1: #e69f00;
+  --data-2: #56b4e9;
+  --data-3: #009e73;
+  --data-4: #f0e442;
+  --data-5: #0072b2;
+  --data-6: #d55e00;
+  --data-7: #cc79a7;
+  --data-8: #000000;
+}
+html[data-theme="dark"] { --data-8: #f2f2ef; }
+
+/* ---- canvas ---- */
+/* Latin Modern Roman 2.005 of TeX Live, converted to WOFF2 with fontTools. LM Roman 10 is set at
+   400, and LM Roman Demi 10 at 500, whose italic is its oblique. A Greek letter in prose is set in
+   the Greek of STIX Two Text, from theme/vendor/fonts/stix-two-text.css */
+@font-face {
+  font-family: "Latin Modern Roman";
+  font-style: normal;
+  font-weight: 400;
+  font-display: block;
+  src: url(vendor/latin-modern/latin-modern-roman-400-normal.woff2) format("woff2");
+}
+@font-face {
+  font-family: "Latin Modern Roman";
+  font-style: italic;
+  font-weight: 400;
+  font-display: block;
+  src: url(vendor/latin-modern/latin-modern-roman-400-italic.woff2) format("woff2");
+}
+@font-face {
+  font-family: "Latin Modern Roman";
+  font-style: normal;
+  font-weight: 500;
+  font-display: block;
+  src: url(vendor/latin-modern/latin-modern-roman-500-normal.woff2) format("woff2");
+}
+@font-face {
+  font-family: "Latin Modern Roman";
+  font-style: italic;
+  font-weight: 500;
+  font-display: block;
+  src: url(vendor/latin-modern/latin-modern-roman-500-italic.woff2) format("woff2");
+}
+html, body, .reveal-viewport { background: var(--bg); }
+.reveal {
+  font-family: "Latin Modern Roman", "STIX Two Text", Georgia, "Times New Roman", serif;
+  font-size: 48px;
+  font-weight: 400;
+  line-height: 1.4;
+  color: var(--text);
+}
+.reveal .slides { text-align: left; }
+.reveal .slides section,
+.reveal .slides section > section {
+  box-sizing: border-box;
+  height: 100%;
+  padding: 0;
+  text-align: left;
+  line-height: 1.4;
+  font-weight: inherit;
+  overflow: hidden;
+}
+.reveal .slides section .backdrop,
+.reveal .slides section .surface,
+.reveal .slides section .figure-box,
+.reveal .slides section .run,
+.reveal .slides section .foot,
+.reveal .slides section .refs,
+.reveal .slides section .lockup,
+.reveal .slides section .title-text,
+.reveal .slides section .sec,
+.reveal .slides section .caption,
+.reveal .slides section .text-column { position: absolute; }
+
+/* ---- type ---- */
+.reveal h1, .reveal h2, .reveal h3, .reveal h4 {
+  margin: 0;
+  font-family: inherit;
+  font-weight: 500;
+  color: var(--text);
+  letter-spacing: normal;
+  text-transform: none;
+  text-shadow: none;
+  word-wrap: normal;
+}
+.reveal h1 { font-size: 96px; line-height: 1.06; letter-spacing: -0.012em; }
+.reveal h2 { font-size: 64px; line-height: 1.18; }
+.reveal h3 { font-size: 48px; line-height: 1.3; }
+.reveal section.section h2 { font-size: 96px; line-height: 1.14; }
+.reveal p { margin: 0 0 24px; }
+.reveal p:last-child { margin-bottom: 0; }
+.reveal .sub { font-size: 48px; font-style: italic; color: var(--subtle); line-height: 1.3; }
+.reveal .caption { font-size: 36px; line-height: 1.38; font-style: italic; color: var(--subtle); }
+.reveal .small { font-size: 36px; line-height: 1.4; color: var(--muted); }
+.reveal em { font-style: italic; }
+.reveal strong { font-weight: 500; }
+/* a theorem is a paragraph whose head, e.g. Lemma 2 (stable manifold)., is written into data-head by
+   src/theorems.ts, with the style of its kind in data-style. as in amsthm, the head is bold, the
+   words of the plain style are italic with an upright emphasis, the head of the remark style and of
+   a proof is italic, and a proof ends with a square at the right. a kind that is not defined is
+   headed by its name in red */
+.reveal p.theorem::before { content: attr(data-head) " "; font-weight: 500; font-style: normal; }
+.reveal p.theorem[data-style="plain"] { font-style: italic; }
+.reveal p.theorem[data-style="plain"] em { font-style: normal; }
+.reveal p.theorem[data-style="remark"]::before { font-weight: inherit; font-style: italic; }
+.reveal p.theorem[data-kind="proof"]::after { content: ""; float: right; box-sizing: border-box; width: 0.5em; height: 0.5em; margin: 0.5em 0 0 0.5em; border: 0.04em solid currentColor; }
+.reveal p.theorem[data-missing]::before { color: var(--red); }
+.reveal a { color: inherit; text-decoration: underline; text-decoration-color: var(--accent); text-decoration-thickness: 2px; text-underline-offset: 0.14em; transition: text-decoration-color 200ms ease-out, color 200ms ease-out; }
+.reveal a:hover { color: var(--accent); }
+/* the reset of reveal.js sets sup and sub on the baseline. with line-height 0, a raised number does
+   not make its line taller */
+.reveal sub, .reveal sup { font-size: 0.7em; line-height: 0; }
+.reveal sup { vertical-align: super; }
+.reveal sub { vertical-align: sub; }
+
+/* words in a color of the palette, set with Text Color of the editor. tone-text gives the words of
+   a block drawn in another color, e.g. a small paragraph, the text color */
+.reveal .tone-text { color: var(--text); }
+.reveal .tone-accent { color: var(--accent); }
+.reveal .tone-violet { color: var(--violet); }
+.reveal .tone-blue { color: var(--blue); }
+.reveal .tone-red { color: var(--red); }
+.reveal .tone-subtle { color: var(--subtle); }
+.reveal .tone-muted { color: var(--muted); }
+
+/* a text block centered with Center of the editor. reveal.js reads the class center on a section, hence the
+   editor writes it only on a text block */
+.reveal .center { text-align: center; }
+
+/* a line or an arrow on a slide, set with Insert > Line of the editor: an svg as large as the box of
+   its line, or of the path of a curve or an elbow, placed at the upper left of the slide and moved
+   by its translate, stroked in --text or in the tone of its class at the width of a mark of a plot.
+   an arrowhead is the marker of the svg, drawn in the same color */
+.reveal .slides section svg.line { position: absolute; left: 0; top: 0; margin: 0; overflow: visible; pointer-events: none; color: var(--text); }
+.reveal .slides section svg.line.tone-accent { color: var(--accent); }
+.reveal .slides section svg.line.tone-violet { color: var(--violet); }
+.reveal .slides section svg.line.tone-blue { color: var(--blue); }
+.reveal .slides section svg.line.tone-red { color: var(--red); }
+.reveal .slides section svg.line.tone-muted { color: var(--muted); }
+/* the weight in px of the stroke of a line and of the outline of a shape, 3 without a class */
+.reveal :where(svg.line, .shape) { --weight: 3px; }
+.reveal :where(svg.line, .shape).weight-2 { --weight: 2px; }
+.reveal :where(svg.line, .shape).weight-6 { --weight: 6px; }
+.reveal :where(svg.line, .shape).weight-8 { --weight: 8px; }
+.reveal svg.line > line, .reveal svg.line > path { stroke: currentColor; stroke-width: var(--weight); stroke-linecap: butt; fill: none; }
+/* a dash of three weights with a gap of two. the head of an arrow is in units of the stroke
+   width, hence it grows with the weight */
+.reveal svg.line.dashed > line, .reveal svg.line.dashed > path { stroke-dasharray: calc(3 * var(--weight)) calc(2 * var(--weight)); }
+.reveal svg.line marker { overflow: visible; }
+.reveal svg.line marker path { fill: currentColor; stroke: none; }
+
+/* lists: an orange chevron in place of a bullet, numbers in gray */
+.reveal ul, .reveal ol { display: block; margin: 24px 0 0; padding: 0; list-style: none; }
+.reveal li { position: relative; margin: 0 0 14px; padding-left: 54px; }
+.reveal ul > li::before { --mark-width: 12px; content: ""; position: absolute; left: 9px; top: calc(0.72em - 8px); width: 12px; height: 18px; background: var(--accent); clip-path: polygon(0 0, 30% 0, 100% 50%, 30% 100%, 0 100%, 70% 50%); }
+/* the items of a ul.dots or a ul.dashes take a ring or a short dash in place of the chevron,
+   centered on its middle. a nested list without the class keeps the chevron */
+.reveal ul.dots > li::before { --mark-width: 14px; top: calc(0.72em - 6px); left: 7px; width: 14px; height: 14px; box-sizing: border-box; border: 2.5px solid var(--accent); border-radius: 50%; background: none; clip-path: none; }
+.reveal ul.dashes > li::before { --mark-width: 28px; top: 0.72em; left: 0; width: 28px; height: 2px; clip-path: none; }
+/* the number is the counter list-item, which a browser starts from the attribute start of an ol.
+   it ends where a number of one digit ends, so that the gap before the words is the same for any
+   number of digits */
+.reveal ol > li::before { --mark-width: 1ch; content: counter(list-item); position: absolute; right: calc(100% - 1ch); top: 0; color: var(--muted); font-variant-numeric: tabular-nums; }
+/* an empty item, e.g. the placeholder of a new slide left empty, is drawn without its mark */
+.reveal li:empty::before { content: none; }
+/* an empty paragraph or item takes the height of a line, as in the editor, where its prompt is
+   drawn, so that an element placed with translate under it is drawn at the same place in both */
+.reveal .slides section :is(p, li):empty { min-height: 1lh; }
+/* in a centered list, nested lists too, and in a list of a shape not aligned to the left, the mark
+   is drawn in the line before the words and centered with them. its box, --mark-width wide,
+   starts 54 px before the words, and the mark is drawn where it is drawn at the left */
+.reveal :is(ul.center, ol.center, .shape > :is(ul, ol):not(.left)) li { padding-left: 0; }
+.reveal :is(ul.center, ol.center, .shape > :is(ul, ol):not(.left)) li::before { position: relative; right: auto; display: inline-block; vertical-align: top; margin-right: calc(54px - var(--mark-width, 28px)); }
+.reveal li ul, .reveal li ol { margin-top: 10px; font-size: 36px; }
+.reveal .outline { font-size: 36px; line-height: 1.7; color: var(--muted); margin: 48px 0 0; }
+.reveal .outline > li { margin: 0; padding-left: 42px; }
+.reveal .outline > li::before { display: none; }
+.reveal .outline > li.now { color: var(--text); }
+.reveal .outline > li.now::before { content: ""; display: block; position: absolute; left: 0; top: 0.78em; width: 22px; height: 2px; background: var(--violet); }
+
+/* math: the size of the MathJax output is inherited, and a display block is a little larger and left aligned */
+.reveal .math { margin: 28px 0 4px; font-size: 52px; }
+.reveal mjx-container[display="true"] { margin: 0 !important; text-align: left !important; }
+.reveal .math.center mjx-container[display="true"] { text-align: center !important; }
+.reveal mjx-container { color: inherit; }
+
+/* code: the system monospace, since a monospace face is not vendored with the theme */
+.reveal pre, .reveal code { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; }
+/* inline code: a chip tinted with the text color, with rounded corners and a hairline, as in Obsidian and Jira. a chip
+   broken over two lines is closed at each end */
+.reveal code { font-size: 0.86em; color: var(--text); padding: 0.06em 0.3em; border-radius: 0.3em; background: color-mix(in srgb, var(--text) 9%, transparent); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--text) 14%, transparent); -webkit-box-decoration-break: clone; box-decoration-break: clone; }
+.reveal pre { margin: 24px 0; padding: 24px 32px; font-size: 36px; line-height: 1.45; color: var(--text); background: color-mix(in srgb, var(--line) 45%, transparent); border-left: 2px solid var(--line); overflow: hidden; width: auto; box-shadow: none; }
+.reveal pre code { display: block; padding: 0; border-radius: 0; background: none; box-shadow: none; color: inherit; font-size: inherit; max-height: none; overflow: hidden; white-space: pre; }
+/* a box of the highlight plugin of reveal.js, i.e. a pre with the class code-wrapper. with data-line-numbers, the lines
+   are numbered in a table, and each group of lines after the first is lit in a copy of the code, a fragment stacked
+   over the first. the copies are thus opaque and are not dimmed as past steps, and the box is dimmed as a whole once a
+   later step outside it is shown */
+/* the size is also given to a box with a language while the deck is edited, since the plugin is not loaded there */
+.reveal pre.code-wrapper, .reveal pre:has(> code[class*="language-"]) { font-size: 22px; line-height: 1.25; }
+.reveal pre.code-wrapper { position: relative; padding: 0; background: none; transition: opacity 400ms ease-out; }
+.reveal .slides pre.code-wrapper code.hljs { padding: 24px; font-size: inherit; white-space: pre; word-wrap: normal; word-break: normal; max-height: none; color: var(--text); background: color-mix(in srgb, var(--line) 45%, var(--bg)); }
+.reveal pre code table.hljs-ln { margin: 0; font-size: inherit; line-height: inherit; }
+.reveal pre code .hljs-ln td { padding: 0; border: 0; vertical-align: top; }
+.reveal pre code .hljs-ln td.hljs-ln-numbers { padding-right: 1em; text-align: right; opacity: 1; user-select: none; }
+.reveal pre code .hljs-ln-n { color: var(--muted); }
+.reveal pre code.hljs.has-highlights tr:not(.highlight-line) { opacity: 0.35; }
+.reveal .slides section:not([data-complete]) pre.code-wrapper > code.fragment.visible:not(.current-fragment) { opacity: 1; }
+.reveal .slides section:not([data-complete]) pre.code-wrapper:has(> code.fragment.visible):not(:has(> code.current-fragment)) { opacity: 0.45; }
+.reveal .hljs-keyword, .reveal .hljs-literal, .reveal .hljs-meta { color: var(--violet); }
+.reveal .hljs-built_in { color: var(--trajectory-3); }
+.reveal .hljs-title { color: var(--accent); }
+.reveal .hljs-params { color: var(--trajectory-6); }
+.reveal .hljs-string { color: var(--trajectory-4); }
+.reveal .hljs-number { color: var(--trajectory-5); }
+.reveal .hljs-comment { color: var(--muted); font-style: italic; }
+.reveal .hljs-operator { color: var(--subtle); }
+
+/* tables: hairlines on the color of the slide, which hides what a table is moved over */
+.reveal table { margin: 24px 0 0; border-collapse: collapse; font-size: 36px; line-height: 1.4; }
+.reveal .slides section > table, .reveal .slides section > .col > table { position: relative; z-index: 1; background: var(--bg); }
+.reveal th, .reveal td { padding: 10px 40px 10px 0; text-align: left; vertical-align: top; border-bottom: 1px solid var(--line); font-weight: inherit; }
+.reveal th { color: var(--subtle); font-style: italic; }
+.reveal tr:last-child td { border-bottom: 0; }
+
+/* ---- chrome inside the slide ---- */
+.reveal .run { left: 120px; top: 44px; font-size: 22px; font-style: italic; color: var(--muted); }
+.reveal .foot, .reveal .refs { left: 120px; bottom: 50px; max-width: 1100px; font-size: 28px; line-height: 1.4; color: var(--muted); }
+.reveal .foot a { text-decoration-thickness: 1px; }
+/* a citation is an empty cite element whose number is written into data-n by src/citations.ts, and
+   a key that is not in the bibliography is drawn in red in place of a number. the references of a
+   slide are in the div refs that src/citations.ts makes, at the line of a footnote, and a footnote
+   is lifted by their height, which is in --refs on the slide. a reference is hidden with the class
+   off until the step of its citation, and it keeps its place */
+.reveal cite[data-key]::after { content: attr(data-n); margin-left: 3px; font-size: 0.55em; line-height: 0; vertical-align: super; font-style: normal; font-weight: 400; color: var(--subtle); }
+.reveal cite[data-missing]::after { color: var(--red); }
+.reveal .foot { bottom: calc(50px + var(--refs, 0px)); }
+.reveal .refs { display: flex; flex-wrap: wrap; column-gap: 44px; }
+.reveal .refs .ref { transition: opacity 400ms ease-out; }
+.reveal .refs .ref.off { opacity: 0; visibility: hidden; }
+.reveal .refs sup { margin-right: 6px; font-size: 0.55em; vertical-align: super; color: var(--subtle); }
+.reveal .refs a { text-decoration: none; }
+.reveal .refs a:hover { text-decoration: underline; text-decoration-color: var(--accent); text-decoration-thickness: 1px; }
+.reveal .lockup { height: 72px; width: auto; }
+html:not([data-theme="light"]) .reveal .for-light, html[data-theme="light"] .reveal .for-dark { display: none !important; }
+
+/* brand marks: the group logo at the top right of every slide but the title and closing ones,
+   the Princeton Engineering lockup at the top left of those. They are switched off with body.no-logo and body.no-lockup. */
+.reveal .slides section::after {
+  content: "";
+  position: absolute;
+  right: 120px;
+  top: 44px;
+  width: 44px;
+  height: 44px;
+  background: url("../brand/logo.png") center / contain no-repeat;
+  opacity: 0.9;
+  pointer-events: none;
+}
+.reveal .slides section.title::after,
+.reveal .slides section.closing::after,
+body.no-logo .reveal .slides section::after { content: none; }
+/* the group logo in the middle of a QR code. without it, a code is drawn at a lower error correction level */
+.reveal { --qr-logo: url("../brand/logo.png"); }
+body.no-logo .reveal { --qr-logo: none; }
+.reveal .slides section.title::before,
+.reveal .slides section.closing::before {
+  content: "";
+  position: absolute;
+  left: 120px;
+  top: 60px;
+  width: 440px;
+  height: 72px;
+  background: url("../brand/lockup-dark.png") left center / contain no-repeat;
+  pointer-events: none;
+}
+html[data-theme="light"] .reveal .slides section.title::before,
+html[data-theme="light"] .reveal .slides section.closing::before { background-image: url("../brand/lockup-light.png"); }
+body.no-lockup .reveal .slides section.title::before,
+body.no-lockup .reveal .slides section.closing::before { content: none; }
+
+/* ---- backdrops, drawn with beeson.js ---- */
+.reveal .backdrop { pointer-events: auto; }
+.reveal .backdrop canvas { position: absolute; left: 0; top: 0; width: 100%; height: 100%; }
+.reveal .backdrop .label { position: absolute; transform: translate(-50%, -50%); white-space: nowrap; line-height: 1; font-size: 28px; font-style: italic; color: var(--subtle); }
+.reveal .backdrop .label sub { font-size: 0.7em; font-style: normal; vertical-align: -0.25em; }
+
+/* ---- surfaces, drawn with beeson.js and three.js, and turned with a drag ---- */
+.reveal .surface { pointer-events: auto; cursor: grab; touch-action: none; user-select: none; }
+.reveal .surface.dragging { cursor: grabbing; }
+.reveal .surface canvas { position: absolute; left: 0; top: 0; width: 100%; height: 100%; }
+.reveal .surface .label { position: absolute; transform: translate(-50%, -50%); white-space: nowrap; line-height: 1; font-size: 36px; color: var(--text); opacity: 0; pointer-events: none; filter: drop-shadow(0 0 3px var(--bg)) drop-shadow(0 0 1px var(--bg)); }
+
+/* ---- layouts ---- */
+/* content, the default: a text column at the left margin, a figure box at the right */
+.reveal .slides section { padding: 120px 120px 0 120px; }
+.reveal .slides section > h2 { width: 1100px; margin: 0 0 42px; }
+.reveal .slides section > p,
+.reveal .slides section > ul,
+.reveal .slides section > ol,
+.reveal .slides section > table,
+.reveal .slides section > pre,
+.reveal .slides section > .math,
+.reveal .slides section > .col { max-width: 1000px; }
+.reveal .slides section > .col { margin: 0; }
+.reveal .slides section .figure-box { left: 1200px; top: 120px; width: 600px; height: 800px; }
+.reveal .slides section .backdrop { left: 1200px; top: 0; width: 720px; height: 1080px; }
+.reveal .slides section.narrow .backdrop { left: 920px; width: 1000px; }
+.reveal .slides section .surface { left: 1120px; top: 0; width: 800px; height: 1080px; }
+.reveal .slides section.narrow .surface { left: 880px; width: 1040px; }
+.reveal .slides section .figure-box > img,
+.reveal .slides section .figure-box > svg,
+.reveal .slides section .figure-box > video { display: block; width: 100%; height: 100%; object-fit: contain; }
+.reveal .slides section tycho-viewer.figure-box { display: block; }
+/* the labels of a viewer inherit the face of the slide, and the recordings of the PowerPoint export
+   set them in this face as well, see scripts/scenes.mjs */
+.reveal tycho-viewer { --tycho-font: "Latin Modern Roman", "STIX Two Text", Georgia, "Times New Roman", serif; }
+/* a viewer in a figure box or a plate fills it, as a video does, and so does its still in the print view, see src/print.ts */
+.reveal .slides section .figure-box > tycho-viewer,
+.reveal .slides section .figure-box > .viewer-still,
+.reveal .slides section.figure .plate > tycho-viewer,
+.reveal .slides section.figure .plate > .viewer-still { width: 100%; height: 100%; }
+.reveal .slides section .figure-box > figcaption,
+.reveal .slides section .figure-box > .caption { position: absolute; left: 0; right: 0; top: 100%; margin-top: 16px; }
+.reveal .slides section.narrow > h2,
+.reveal .slides section.narrow > p,
+.reveal .slides section.narrow > ul,
+.reveal .slides section.narrow > ol,
+.reveal .slides section.narrow > table,
+.reveal .slides section.narrow > .math,
+.reveal .slides section.narrow > .col { max-width: 760px; width: auto; }
+.reveal .slides section.wide > h2,
+.reveal .slides section.wide > p,
+.reveal .slides section.wide > ul,
+.reveal .slides section.wide > ol,
+.reveal .slides section.wide > table,
+.reveal .slides section.wide > .math,
+.reveal .slides section.wide > pre,
+.reveal .slides section.wide > .col { max-width: 1680px; width: auto; }
+/* a text block with a width in its style, e.g. one sized in the editor, is wrapped at that width,
+   past the text column */
+.reveal .slides section > :is(h2, p, ul, ol, .math)[style*="width:"] { max-width: none; }
+
+/* title and closing, plate: the backdrop over the whole slide, the words in a block at the lower left */
+.reveal .slides section.title,
+.reveal .slides section.closing,
+.reveal .slides section.figure,
+.reveal .slides section.section,
+.reveal .slides section.split { padding: 0; }
+.reveal .slides section.title .backdrop,
+.reveal .slides section.closing .backdrop,
+.reveal .slides section.figure .backdrop,
+.reveal .slides section.figure .surface,
+.reveal .slides section.figure .plate { left: 0; top: 0; width: 1920px; height: 1080px; }
+.reveal .slides section.title .title-text,
+.reveal .slides section.closing .title-text { left: 120px; bottom: 150px; width: 1240px; }
+.reveal .slides section.title .title-text h1,
+.reveal .slides section.closing .title-text h1 { margin: 0; }
+.reveal .slides section.title .sub,
+.reveal .slides section.closing .sub { margin: 30px 0 0; }
+.reveal .slides section.title .who,
+.reveal .slides section.closing .who { margin: 44px 0 0; font-size: 36px; line-height: 1.5; color: var(--subtle); }
+.reveal .slides section.title .who strong,
+.reveal .slides section.closing .who strong { color: var(--text); font-weight: 400; }
+/* a QR code on a closing slide, in the lower right corner. the backdrop is drawn over it, and under the words */
+.reveal .slides section.closing .qr { position: absolute; right: 50px; bottom: 50px; width: 200px; }
+.reveal .slides section.closing .backdrop canvas { z-index: 1; pointer-events: none; }
+.reveal .slides section.closing .title-text { z-index: 2; }
+
+/* section: the words at the left, the outline of the talk under them, the backdrop at the right */
+.reveal .slides section.section .sec { left: 120px; top: 360px; width: 900px; }
+.reveal .slides section.section .sec h2 { width: auto; margin: 0; }
+.reveal .slides section.section .backdrop { left: 1040px; top: 0; width: 880px; height: 1080px; }
+
+/* figure, plate: a figure or backdrop over the whole slide, the head at the top left, the caption at the lower left */
+.reveal .slides section.figure > h2 { position: absolute; left: 120px; top: 100px; width: 1200px; margin: 0; }
+.reveal .slides section.figure > .caption { left: 120px; bottom: 130px; width: 900px; margin: 0; }
+.reveal .slides section.figure .plate { display: block; padding: 200px 120px 250px; box-sizing: border-box; }
+.reveal .slides section.figure .plate > img,
+.reveal .slides section.figure .plate > svg,
+.reveal .slides section.figure .plate > video { display: block; width: 100%; height: 100%; object-fit: contain; object-position: right center; }
+/* a white figure is framed at the size of its image, scaled down to fit and not enlarged, since the
+   frame would otherwise fill the whole box beside the image */
+.reveal .slides section.figure .plate:has(> img.white-figure) { display: flex; justify-content: flex-end; align-items: center; }
+.reveal .slides section .figure-box:has(> img.white-figure) { display: flex; justify-content: center; align-items: center; }
+.reveal .slides section.figure .plate > img.white-figure,
+.reveal .slides section .figure-box > img.white-figure { width: auto; height: auto; max-width: 100%; max-height: 100%; min-width: 0; min-height: 0; }
+/* a picture with a width in its style, e.g. one sized in the editor, is drawn at that size, past
+   the box of its figure box or plate, and with a height in its style as well it is stretched to it */
+.reveal .slides section img[style*="width:"],
+.reveal .slides section video[style*="width:"] { max-width: none !important; max-height: none !important; flex-shrink: 0; }
+.reveal .slides section img[style*="width:"]:not([style*="height:"]),
+.reveal .slides section video[style*="width:"]:not([style*="height:"]) { height: auto !important; }
+.reveal .slides section img[style*="width:"][style*="height:"]:not([style*="object-fit"]),
+.reveal .slides section video[style*="width:"][style*="height:"]:not([style*="object-fit"]) { object-fit: fill !important; }
+/* a figure box around a picture with a width is the size of the picture, hence its caption is under the
+   picture and as wide as it, and so is one around a tycho viewer with a height, i.e. one resized in the editor, or
+   around its still in the print view. the still of a viewer in the print view keeps the box of its viewer */
+.reveal .slides section .figure-box:not(.viewer-still):has(> img[style*="width:"], > video[style*="width:"], > .qr[style*="width:"], > tycho-viewer[style*="height:"], > .viewer-still[style*="height:"]) { width: auto; height: auto; }
+/* the videos of a figure box or a plate are stacked in one place, and a video under a later one that is shown is hidden
+   once the later one has faded in, see src/video.ts. in a plate of the class row, the figures are side by side,
+   each in an equal share of the plate, and a figure resized by itself in the editor, with a width in its style, is
+   drawn at its width */
+.reveal .slides section .figure-box:has(> video ~ video),
+.reveal .slides section.figure .plate:not(.row):has(> video ~ video) { display: grid; grid-template: 100% / 100%; }
+.reveal .slides section .figure-box > video,
+.reveal .slides section.figure .plate:not(.row) > video { grid-area: 1 / 1; }
+.reveal .slides section video[data-covered],
+.reveal .slides section video.fragment[data-covered] { visibility: hidden; transition: opacity 400ms ease-out, visibility 0s 400ms; }
+.reveal .slides section.figure .plate.row { display: flex; gap: 60px; }
+.reveal .slides section.figure .plate.row > * { flex: 1 1 0; min-width: 0; object-position: center; }
+.reveal .slides section.figure .plate.row > [style*="width:"] { flex: none; }
+
+/* split: the black text column of the group deck, dark in both modes, with a figure at the right */
+.reveal .slides section.split .text-column { left: 0; top: 0; width: 760px; height: 1080px; padding: 120px 80px 0 120px; box-sizing: border-box; background: var(--text-column); color: var(--text-column-text); }
+.reveal .slides section.split .text-column h2 { width: auto; color: inherit; font-size: 64px; margin-bottom: 28px; }
+.reveal .slides section.split .text-column p, .reveal .slides section.split .text-column li { font-size: 48px; }
+.reveal .slides section.split .text-column .foot, .reveal .slides section.split > .refs { color: #7c7c76; }
+/* the references of a split slide are on its text column */
+.reveal .slides section.split > .refs { max-width: 560px; }
+.reveal .slides section.split > .refs sup { color: var(--text-column-subtle); }
+/* the style Small in the text column, and code in its colors, which is dark in both modes */
+.reveal .slides section.split .text-column .small, .reveal .slides section.split .text-column .small li { font-size: 36px; color: var(--text-column-text); }
+.reveal .slides section.split .text-column :not(pre) > code { color: var(--text-column-text); background: color-mix(in srgb, var(--text-column-text) 9%, transparent); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--text-column-text) 14%, transparent); }
+/* on the black canvas the edge of the text column is marked with a hairline */
+html:not([data-theme="light"]) .reveal .slides section.split .text-column { box-shadow: 1px 0 0 var(--line); }
+.reveal .slides section.split .figure-box { left: 880px; top: 120px; width: 920px; height: 800px; }
+.reveal .slides section.split .run { display: none; }
+.reveal .slides section.split::after { right: 120px; }
+
+/* ---- plot: an animated 2D plot in a figure box or a plate, drawn from a JSON script, see src/plot.ts ---- */
+.reveal .slides section .plot { font-size: 28px; line-height: 1.2; color: var(--subtle); }
+.reveal .plot-body { display: flex; flex-direction: column; gap: 12px; width: 100%; height: 100%; }
+.reveal .plot button { margin: 0; padding: 0; border: 0; background: none; font: inherit; color: inherit; cursor: pointer; }
+.reveal .plot-tabs { display: flex; flex: none; gap: 40px; }
+.reveal .plot-tabs button { padding: 2px 0 6px; border-bottom: 2px solid transparent; color: var(--muted); transition: color 200ms ease-out, border-color 200ms ease-out; }
+.reveal .plot-tabs button:hover { color: var(--text); }
+.reveal .plot-tabs button:disabled { cursor: default; }
+.reveal .plot-tabs button[aria-selected="true"] { color: var(--text); border-bottom-color: var(--violet); }
+.reveal .plot-area { position: relative; flex: 1 1 auto; min-height: 0; }
+.reveal .plot-area > svg,
+.reveal .plot-labels { position: absolute; left: 0; top: 0; width: 100%; height: 100%; overflow: visible; }
+.reveal .plot-labels { pointer-events: none; }
+.reveal .plot-label { position: absolute; white-space: nowrap; line-height: 1; }
+.reveal .plot i { font-style: italic; }
+.reveal .plot sub { vertical-align: -0.25em; }
+.reveal .plot sup { vertical-align: 0.45em; }
+.reveal .plot-tick { color: var(--muted); font-variant-numeric: tabular-nums; }
+.reveal .plot-axes path { fill: none; stroke: var(--muted); stroke-width: 2; }
+.reveal .plot-curve,
+.reveal .plot-ghost,
+.reveal .plot-trace { fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; }
+.reveal .plot-ghost { opacity: 0.22; }
+.reveal .plot-region,
+.reveal .plot-dot { fill: currentColor; stroke: none; }
+.reveal .plot-hollow { fill: var(--bg); stroke: currentColor; }
+.reveal .plot-ring { fill: none; stroke: currentColor; }
+.reveal .plot-area g,
+.reveal .plot-area circle,
+.reveal .plot-label { transition: opacity 400ms ease-out; }
+.reveal .plot-off { opacity: 0.3; }
+.reveal .plot .plot-later,
+.reveal .plot .plot-hidden { opacity: 0; }
+/* an element of a plot with a delay is shown that many seconds after its step. a curve with a wipe is
+   traced from its first point to its last, as the Wipe of PowerPoint, and a region with an iris is grown
+   as a disk from a point. each is hidden at once when its step is undone */
+.reveal .plot .plot-delayed:not(.plot-hidden) { transition-delay: var(--plot-delay); }
+.reveal .plot .plot-wipe { stroke-dasharray: 1 1; stroke-dashoffset: 0; transition: stroke-dashoffset var(--plot-wipe) ease-in-out var(--plot-delay, 0s), opacity 0s linear var(--plot-delay, 0s); }
+.reveal .plot .plot-iris { transform-box: view-box; transform: scale(1); transition: transform var(--plot-iris) cubic-bezier(0.25, 0.6, 0.3, 1) var(--plot-delay, 0s), opacity 0s linear var(--plot-delay, 0s); }
+.reveal .plot .plot-wipe.plot-hidden { stroke-dashoffset: 1; transition: none; }
+.reveal .plot .plot-iris.plot-hidden { transform: scale(0); transition: none; }
+.reveal .plot-bar { display: flex; flex: none; align-items: center; gap: 28px; height: 44px; }
+.reveal .plot-play { position: relative; flex: none; width: 40px; height: 40px; color: var(--subtle); }
+.reveal .plot-play:hover { color: var(--text); }
+.reveal .plot-play::before { content: ""; position: absolute; left: 11px; top: 8px; border-style: solid; border-width: 12px 0 12px 20px; border-color: transparent transparent transparent currentColor; }
+.reveal .plot-play.playing::before { left: 10px; top: 9px; width: 8px; height: 22px; border-width: 0 6px; border-color: currentColor; }
+.reveal .plot-scrub { position: relative; flex: 1 1 auto; height: 40px; cursor: pointer; touch-action: none; }
+.reveal .plot-scrub::before { content: ""; position: absolute; left: 0; right: 0; top: 19px; height: 2px; background: var(--stroke); }
+.reveal .plot-fill { position: absolute; left: 0; top: 19px; height: 2px; background: var(--accent); }
+.reveal .plot-knob { position: absolute; top: 12px; width: 16px; height: 16px; margin-left: -8px; border-radius: 50%; background: var(--accent); }
+.reveal .plot-ticks { position: absolute; left: 0; top: 0; width: 100%; height: 100%; }
+.reveal .plot-tick-mark { position: absolute; top: 10px; width: 2px; height: 20px; margin-left: -1px; background: var(--subtle); }
+.reveal .plot-readout { flex: none; min-width: 240px; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.reveal .plot-value { color: var(--text); }
+.reveal .plot-error { font-size: 28px; color: var(--accent); }
+
+/* ---- TikZ figure: the SVG of figures/name.js in the mode of the deck, centered in its box, see src/tikz.ts ---- */
+.reveal .slides section .tikz { display: flex; align-items: center; justify-content: center; }
+/* an output larger than its box is shown smaller as a whole, since its drawing is kept in its viewBox */
+.reveal .slides section .tikz > svg { display: block; flex: none; max-width: 100%; max-height: 100%; }
+/* a part is hidden until its step, with the fade of a fragment */
+.reveal .tikz > svg g[data-part] { transition: opacity 400ms ease-out; }
+.reveal .tikz > svg g.tikz-later { opacity: 0; }
+.reveal .tikz-error { font-size: 28px; color: var(--accent); }
+
+/* figure treatments: a white raster figure framed in white, and a black-on-white line plot inverted in dark mode */
+.reveal img { margin: 0; border: 0; box-shadow: none; background: none; max-width: 100%; max-height: 100%; }
+.reveal .white-figure { background: var(--white-figure); padding: 24px; border-radius: 2px; box-sizing: border-box; }
+.reveal .white-figure > img { background: var(--white-figure); }
+html[data-theme="dark"] .reveal .invert { filter: invert(1) hue-rotate(180deg); }
+/* a picture clipped to the ellipse of its box. the crop of the editor writes its inset with the same
+   round 50% on an oval picture, which cuts the ellipse of the cropped box */
+.reveal img.oval { clip-path: inset(0 round 50%); }
+/* a QR code, square at the width of its div, with the quiet zone of four modules inside its tile */
+.reveal .qr { position: relative; width: 320px; aspect-ratio: 1; }
+.reveal .qr > svg { display: block; width: 100%; height: 100%; }
+.reveal .qr .qr-tile { fill: var(--qr-tile); }
+.reveal .qr .qr-ink { fill: var(--qr-ink); }
+.reveal .qr .qr-eye { fill: var(--qr-eye); }
+.reveal .qr .qr-logo { position: absolute; left: 50%; top: 50%; translate: -50% -50%; aspect-ratio: 1; border-radius: 50%; background: var(--qr-logo) center / contain no-repeat; }
+.reveal .qr-error { font-size: 28px; color: var(--accent); }
+
+/* ---- shapes: a box placed and sized in its style, set with Insert > Shape of the editor, with an outline of 3 px in
+   its tone over a tint of the tone and its words centered. the other geometries are an svg that beeson.js draws ---- */
+.reveal .slides section .shape { position: absolute; left: 0; top: 0; margin: 0; box-sizing: border-box; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; padding: 12px 24px; color: var(--text); border: var(--weight) solid currentColor; background: color-mix(in srgb, currentColor 20%, var(--bg)); pointer-events: none; }
+.reveal .slides section .shape.tone-accent { color: var(--accent); }
+.reveal .slides section .shape.tone-violet { color: var(--violet); }
+.reveal .slides section .shape.tone-blue { color: var(--blue); }
+.reveal .slides section .shape.tone-red { color: var(--red); }
+.reveal .slides section .shape.tone-muted { color: var(--muted); }
+/* the words keep the color of the text, under the specificity of a tone of the words */
+.reveal .slides section .shape:not(:has(> :not(svg))) { padding: 0; }
+.reveal .slides section .shape > :not(svg) { margin: 0; position: relative; }
+.reveal :where(.shape) > :where(:not(svg)) { color: var(--text); }
+.reveal .slides section .shape a { pointer-events: auto; }
+/* the words of a shape aligned left with Align Left of the editor */
+.reveal .slides section .shape > .left { align-self: stretch; text-align: left; }
+.reveal .slides section .shape.rounded { border-radius: 24px; }
+.reveal .slides section .shape.rounded.round-s { border-radius: 12px; }
+.reveal .slides section .shape.rounded.round-l { border-radius: 48px; }
+.reveal .slides section .shape.ellipse { border-radius: 50%; }
+.reveal .slides section .shape.no-outline { --weight: 0px; }
+.reveal .slides section .shape.fill-none { background: none; }
+.reveal .slides section .shape.fill-ground { background: var(--bg); }
+.reveal .slides section .shape.fill-translucent { background: color-mix(in srgb, var(--bg) 75%, transparent); }
+.reveal .slides section .shape.fill-translucent:not(.weight-6, .weight-8) { --weight: 0px; }
+.reveal .slides section .shape:is(.triangle, .arrow, .arrow-both, .brace, .plus, .equals) { border: 0; background: none; }
+.reveal .slides section .shape > svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.reveal .slides section .shape > svg path { fill: color-mix(in srgb, currentColor 20%, var(--bg)); stroke: currentColor; stroke-width: var(--weight); stroke-linejoin: miter; }
+.reveal .slides section .shape.fill-none > svg path, .reveal .slides section .shape.brace > svg path { fill: none; }
+.reveal .slides section .shape.fill-ground > svg path { fill: var(--bg); }
+.reveal .slides section .shape.fill-translucent > svg path { fill: color-mix(in srgb, var(--bg) 75%, transparent); }
+/* a flip mirrors the drawing and not the words */
+.reveal .slides section .shape.flip-x > svg { scale: -1 1; }
+.reveal .slides section .shape.flip-y > svg { scale: 1 -1; }
+.reveal .slides section .shape.flip-x.flip-y > svg { scale: -1 -1; }
+.reveal img:hover, .reveal .figure-box:hover > img { transition: filter 200ms ease-out; }
+
+/* ---- steps: a new element is faded in, the earlier ones are dimmed until the slide is complete ---- */
+.reveal .slides section .fragment { transition: opacity 400ms ease-out; }
+.reveal .slides section:not([data-complete]) .fragment.visible:not(.current-fragment) { opacity: 0.45; }
+.reveal .slides section .fragment.visible.current-fragment,
+.reveal .slides section[data-complete] .fragment.visible { opacity: 1; }
+.reveal .slides section .fragment.visible .fragment.visible { opacity: 1; }
+/* nor is a step that holds the current step, e.g. an item of a list with a nested step, so that the current step is not dimmed with it */
+.reveal .slides section:not([data-complete]) .fragment.visible:not(.current-fragment):has(.current-fragment) { opacity: 1; }
+/* a backdrop shown at a step is not dimmed at the later steps */
+.reveal .slides section:not([data-complete]) .backdrop.fragment.visible:not(.current-fragment) { opacity: 1; }
+/* nor is a video or a tycho viewer, which is still played, or the still of a viewer in the print view, see
+   src/print.ts. a video in a fragment of the style play is shown with its poster before its step, and a viewer
+   with the first frame of its scene, and both are played from their step on */
+.reveal .slides section:not([data-complete]) video.fragment.visible:not(.current-fragment),
+.reveal .slides section:not([data-complete]) tycho-viewer.fragment.visible:not(.current-fragment),
+.reveal .slides section:not([data-complete]) .viewer-still.fragment.visible:not(.current-fragment),
+.reveal .slides section:not([data-complete]) .fragment.visible:not(.current-fragment):has(video, tycho-viewer, .viewer-still) { opacity: 1; }
+.reveal .slides section .fragment.play { opacity: 1; visibility: inherit; }
+/* a late step, of the class late, is faded in the seconds of --delay after its step, as the delay of an
+   animation of PowerPoint. the style of a fragment is read once it is visible and before it is current, and a
+   fragment in a shown fragment is not dimmed, hence the delay of such a fragment is set as soon as it is visible.
+   it is faded out without the delay when its step is undone */
+.reveal .slides section .fragment.late.visible.current-fragment,
+.reveal .slides section .fragment.visible .fragment.late.visible { transition-delay: var(--delay); }
+/* the step added to restore the dimmed fragments, kept out of the layout of its slide */
+.reveal .slides section > .fragment[data-restore] { position: absolute; width: 0; height: 0; overflow: hidden; }
+/* stepped math: a held fragment is not dimmed, and the classes named by a shown data-highlight are colored. the
+   colors are important, since the tone of a mark of a plot is set in its style attribute */
+.reveal .slides section:not([data-complete]) .fragment.visible[data-held]:not(.current-fragment) { opacity: 1; }
+/* a dimmed step, Dim of the editor, is drawn from its step on at the opacity of a faint element, also on the complete
+   slide. a faint element is an element set with Faint of the editor, and its opacity is important, since the steps
+   set the opacity of a fragment */
+.reveal .slides section .fragment.visible.semi-fade-out:not([data-held]) { opacity: 0.25; }
+.reveal .slides section .faint { opacity: 0.25 !important; }
+.reveal .hl-target { transition: color 400ms ease-out; }
+.reveal .hl-accent { color: var(--accent) !important; }
+.reveal .hl-violet { color: var(--violet) !important; }
+.reveal .hl-blue { color: var(--blue) !important; }
+.reveal .hl-red { color: var(--red) !important; }
+
+/* ---- the slide change: a 400 ms fade ---- */
+.reveal.fade .slides section:not([data-transition]),
+.reveal.fade .slides > section > section:not([data-transition]) { transition: opacity 400ms ease-out; transform: none; }
+
+/* ---- chrome outside the slide, placed in slide coordinates through --slide-scale ---- */
+/* the progress line does not take a click, at which reveal.js would show the slide of its place. A
+   slide is chosen on the band of the scrubber */
+.reveal .progress { height: 3px; background: transparent; left: calc(50% - 960px * var(--slide-scale, 1)); width: calc(1920px * var(--slide-scale, 1)); pointer-events: none; }
+.reveal .progress span { background: var(--accent); transition: width 400ms ease-out; }
+.reveal .slide-number {
+  right: calc(50% - 840px * var(--slide-scale, 1));
+  bottom: calc(50% - 490px * var(--slide-scale, 1));
+  padding: 0;
+  font-family: inherit;
+  font-size: calc(22px * var(--slide-scale, 1));
+  line-height: 1;
+  color: var(--muted);
+  background: transparent;
+  font-variant-numeric: tabular-nums;
+}
+.reveal .slide-number a { color: inherit; text-decoration: none; }
+.reveal .slide-number-delimiter { margin: 0 0.2em; }
+/* the scrubber of src/scrub.ts, over the progress line. The box of the band is its track and its
+   rows of numbers and names, which take the pointer while the band is open, and the reach that
+   opens the band is measured from its bottom edge. The heading of the hovered slide and the shade
+   are drawn above the box, where the pointer is left to the slide. The track starts at the 3 px of
+   the progress line and grows, and a tick is a gap in the track at the start of a numbered slide,
+   under the slide number and the start time. --rows is the height of the track and the row of
+   numbers */
+.reveal .scrub {
+  --rows: 2.2em;
+  position: absolute;
+  z-index: 35;
+  bottom: 0;
+  left: calc(50% - 960px * var(--slide-scale, 1));
+  width: calc(1920px * var(--slide-scale, 1));
+  height: calc(var(--rows) + 1.4em);
+  font-size: max(13px, calc(22px * var(--slide-scale, 1)));
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+  visibility: hidden;
+  pointer-events: none;
+}
+.reveal .scrub.timed { --rows: 3.2em; }
+.reveal.scrubbing .scrub { visibility: visible; pointer-events: auto; }
+.reveal.scrubbing .progress { opacity: 0; }
+/* a finger at rest on a slide does not select its text or open the menu of a link */
+.reveal.scrubbing { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+.reveal .scrub::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: calc(var(--rows) + 4.2em);
+  background: linear-gradient(to top, var(--bg) 70%, transparent);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 150ms ease-out;
+}
+.reveal.scrubbing .scrub::before { opacity: 1; }
+.reveal .scrub-track {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 3px;
+  background: transparent;
+  transition: height 150ms ease-out, background-color 150ms ease-out;
+}
+.reveal.scrubbing .scrub-track { height: 0.45em; background: var(--line); }
+.reveal .scrub-track span { display: block; height: 100%; background: var(--accent); transform-origin: 0 0; transform: scaleX(0); }
+.reveal .scrub-tick {
+  position: absolute;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.2em;
+  padding-bottom: 0.9em;
+  color: var(--muted);
+  transform: translateX(-50%);
+  opacity: 0;
+  transition: opacity 150ms ease-out;
+}
+.reveal.scrubbing .scrub-tick, .reveal.scrubbing .scrub-name { opacity: 1; }
+.reveal .scrub-tick.first { align-items: flex-start; transform: none; }
+.reveal .scrub-tick.last { align-items: flex-end; transform: translateX(-100%); }
+.reveal .scrub-tick::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  width: 2px;
+  margin-left: -1px;
+  height: 0.45em;
+  background: var(--bg);
+}
+/* the first slide of a section has a taller tick, in the accent over the track and a gap in it
+   as the other ticks, and its number starts at the tick, as the name of the section over it */
+.reveal .scrub-tick.section:not(.last) { align-items: flex-start; transform: none; }
+.reveal .scrub-tick.section::after { left: 0; height: 0.8em; background: linear-gradient(to top, var(--bg) 0.45em, var(--accent) 0); }
+.reveal .scrub-tick.first::after { left: 0; margin-left: 0; }
+.reveal .scrub-tick.last::after { left: auto; right: 0; }
+.reveal .scrub-tick.first:not(.section):not(.hover)::after, .reveal .scrub-tick.last:not(.section):not(.hover)::after { display: none; }
+.reveal .scrub-tick.hover::after { height: 0.8em; background: var(--text); }
+.reveal .scrub-tick.quiet:not(.now):not(.hover):not(.viewed) > span { visibility: hidden; }
+.reveal .scrub-time { font-size: 0.8em; }
+/* the name of a section over the start of its stretch of the track, and that of the closing slide
+   at the end */
+.reveal .scrub-name {
+  position: absolute;
+  bottom: var(--rows);
+  max-width: 40%;
+  padding: 0.1em 0 0.25em;
+  overflow: hidden;
+  color: var(--accent);
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  opacity: 0;
+  transition: opacity 150ms ease-out;
+}
+/* the last viewed slide has an angle that points back before its number or its name */
+.reveal .scrub-tick.viewed { color: var(--subtle); }
+.reveal .scrub-tick.viewed > span:first-child::before, .reveal .scrub-name.viewed > span::before {
+  content: '';
+  display: inline-block;
+  width: 0.36em;
+  height: 0.36em;
+  margin: 0 0.3em 0.12em 0.1em;
+  border: solid currentColor;
+  border-width: 0 0 0.09em 0.09em;
+  transform: rotate(45deg);
+}
+.reveal .scrub-tick.now, .reveal .scrub-name.now { color: var(--accent); }
+.reveal .scrub-tick.hover, .reveal .scrub-name.hover { color: var(--text); }
+.reveal .scrub-heading {
+  position: absolute;
+  bottom: calc(var(--rows) + 1.6em);
+  max-width: 60%;
+  padding-bottom: 0.25em;
+  overflow: hidden;
+  color: var(--text);
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+.reveal .scrub-heading:empty { display: none; }
+/* the heading is drawn clear of a finger on the band */
+.reveal .scrub.finger .scrub-heading { bottom: calc(var(--rows) + 3.4em); max-width: 90%; }
+.theme-switch {
+  position: absolute;
+  z-index: 40;
+  right: calc(50% - 920px * var(--slide-scale, 1));
+  top: calc(50% - 500px * var(--slide-scale, 1));
+  width: calc(28px * var(--slide-scale, 1));
+  height: calc(28px * var(--slide-scale, 1));
+  padding: 0;
+  border: 2px solid var(--muted);
+  border-radius: 50%;
+  background: linear-gradient(90deg, var(--muted) 0 50%, transparent 50% 100%);
+  opacity: 0.45;
+  cursor: pointer;
+  transition: opacity 200ms ease-out;
+}
+.theme-switch:hover, .theme-switch:focus-visible { opacity: 1; outline: none; }
+/* the button is scaled with the slide, to a few pixels on a phone, and a finger needs about 44.
+   hover: none is added, since Firefox on Android reports a fine pointer on a screen with a stylus */
+@media (pointer: coarse), (hover: none) {
+  .theme-switch::after { content: ''; position: absolute; inset: calc(50% - 22px); }
+}
+.pointer-dot {
+  position: fixed;
+  z-index: 50;
+  width: 14px;
+  height: 14px;
+  border: 2px solid var(--accent);
+  border-radius: 50%;
+  pointer-events: none;
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 35%, transparent);
+}
+
+/* the mode flip of antfu.me: a circle at the click point, grown over the old view on a flip to light and shrunk off the
+   new view on a flip to dark. It is a CSS animation, since a script animation started from the ready promise of the view
+   transition is not applied in the first frame in Firefox. --flip-x, --flip-y, and --flip-r are set in src/switcher.ts.
+   The circle starts after 50 ms, because the first composite of the new view is slow on a large display. In Zen, the
+   second or third frame is then late, where the eased circle moves the most. */
+::view-transition-old(root), ::view-transition-new(root) { animation: none; mix-blend-mode: normal; }
+::view-transition-old(root) { z-index: 1; }
+::view-transition-new(root) { z-index: 9999; }
+html.to-light::view-transition-new(root) { animation: flip-open 400ms ease-out 50ms both; }
+html.to-dark::view-transition-old(root) { z-index: 9999; animation: flip-close 400ms ease-out 50ms both; }
+html.to-dark::view-transition-new(root) { z-index: 1; }
+@keyframes flip-open {
+  from { clip-path: circle(0px at var(--flip-x) var(--flip-y)); }
+  to { clip-path: circle(var(--flip-r) at var(--flip-x) var(--flip-y)); }
+}
+@keyframes flip-close {
+  from { clip-path: circle(var(--flip-r) at var(--flip-x) var(--flip-y)); }
+  to { clip-path: circle(0px at var(--flip-x) var(--flip-y)); }
+}
+/* while a backdrop is traced, the deck is a view of its own over the root, flip-deck, and the copies of the traced canvases
+   are in flip-ghost between them, see ghosts() in src/switcher.ts. The deck and the copies are cut with masks at the
+   radius --flip-at, eased as the circle of the root. The progress --flip-p is animated rather than the radius, since a
+   var() in the keyframes of a custom property is not resolved in Firefox. --flip-deck-x and --flip-deck-y are the point
+   of the flip in the box of the deck, which is also the box of flip-ghost. On a flip to dark, --flip-p is also set to 1
+   outside the animation, hence the old deck is shown whole in a frame drawn before the animation is applied */
+@property --flip-p { syntax: '<number>'; inherits: false; initial-value: 0; }
+.flip-ghost { position: fixed; display: none; overflow: hidden; pointer-events: none; view-transition-name: flip-ghost; }
+html:active-view-transition .flip-ghost { display: block; }
+::view-transition-group(*.flip-art) { display: none; }
+::view-transition-group(flip-ghost) { z-index: 1; animation: none; }
+::view-transition-group(flip-deck) { z-index: 2; animation: none; }
+::view-transition-old(flip-deck), ::view-transition-new(flip-deck), ::view-transition-new(flip-ghost) {
+  --flip-at: calc(var(--flip-p) * var(--flip-r));
+  mix-blend-mode: normal;
+}
+html.to-light::view-transition-new(flip-deck) {
+  animation: flip-grow 400ms ease-out 50ms both;
+  mask-image: radial-gradient(circle at var(--flip-deck-x) var(--flip-deck-y), #000 var(--flip-at), transparent var(--flip-at));
+}
+html.to-light::view-transition-old(flip-deck), html.to-light::view-transition-new(flip-ghost) {
+  animation: flip-grow 400ms ease-out 50ms both;
+  mask-image: radial-gradient(circle at var(--flip-deck-x) var(--flip-deck-y), transparent var(--flip-at), #000 var(--flip-at));
+}
+html.to-dark::view-transition-new(flip-deck) {
+  --flip-p: 1;
+  animation: flip-shrink 400ms ease-out 50ms both;
+  mask-image: radial-gradient(circle at var(--flip-deck-x) var(--flip-deck-y), transparent var(--flip-at), #000 var(--flip-at));
+}
+html.to-dark::view-transition-old(flip-deck), html.to-dark::view-transition-new(flip-ghost) {
+  --flip-p: 1;
+  animation: flip-shrink 400ms ease-out 50ms both;
+  mask-image: radial-gradient(circle at var(--flip-deck-x) var(--flip-deck-y), #000 var(--flip-at), transparent var(--flip-at));
+}
+@keyframes flip-grow { from { --flip-p: 0; } to { --flip-p: 1; } }
+@keyframes flip-shrink { from { --flip-p: 1; } to { --flip-p: 0; } }
+
+/* ---- print (?print-pdf) and stills (?still): everything drawn complete, without the chrome outside the slide ---- */
+html.reveal-print .theme-switch, html.reveal-print .pointer-dot { display: none; }
+/* a page is one piece for the printer, hence a figure taller than the rest of its slide is cut at the
+   edge of the page and not continued on a page of its own */
+html.reveal-print .reveal .pdf-page { overflow: hidden; contain: size; }
+html.reveal-print .reveal .slides section { height: 1080px !important; padding: 120px 120px 0 120px !important; }
+/* a slide stacks its elements by their z-index, as in the show, hence one sent behind the others is not
+   drawn under the background of its page */
+html.reveal-print .reveal .slides section { isolation: isolate; }
+html.reveal-print .reveal .slides section.title,
+html.reveal-print .reveal .slides section.closing,
+html.reveal-print .reveal .slides section.figure,
+html.reveal-print .reveal .slides section.section,
+html.reveal-print .reveal .slides section.split { padding: 0 !important; }
+html.reveal-print .reveal .slide-number-pdf { right: 120px; bottom: 50px; font-size: 22px; color: var(--muted); background: transparent; padding: 0; font-family: inherit; }
+html.reveal-print .reveal .slides section .fragment,
+html.reveal-print .reveal .refs .ref,
+html.reveal-print .reveal .slides section video[data-covered],
+html.reveal-print .reveal .slides section video.fragment[data-covered],
+html.reveal-print .reveal .hl-target,
+html.reveal-print .reveal .plot * { transition: none; }
+html.reveal-print .reveal .plot-play { display: none; }
+
+/* reduced motion: transitions are turned off */
+@media (prefers-reduced-motion: reduce) {
+  .reveal .slides section .fragment,
+  .reveal .refs .ref,
+  .reveal .slides section video[data-covered],
+  .reveal .slides section video.fragment[data-covered],
+  .reveal .hl-target,
+  .reveal .plot .plot-body *,
+  .reveal.fade .slides > section,
+  .reveal .progress span,
+  .reveal .scrub::before,
+  .reveal .scrub-track,
+  .reveal .scrub-tick,
+  .reveal .scrub-name,
+  .reveal a,
+  .theme-switch { transition: none; }
+}

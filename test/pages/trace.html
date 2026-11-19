@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="utf-8" />
+    <title>A traced backdrop</title>
+    <link rel="stylesheet" href="../../theme/vendor/reveal/reset.css" />
+    <link rel="stylesheet" href="../../theme/vendor/reveal/reveal.css" />
+    <link rel="stylesheet" href="../../theme/beeson.css" />
+  </head>
+  <body>
+    <div class="reveal">
+      <div class="slides">
+        <section>
+          <h2>Before the trace</h2>
+        </section>
+        <section class="figure">
+          <div class="backdrop" data-trajectories="trace-trajectories.js" data-cx="0" data-cy="0" data-half="0.5" data-duration="2" data-live></div>
+          <h2>Two straight trajectories</h2>
+        </section>
+        <section class="figure">
+          <div class="backdrop" data-trajectories="trace-order.js" data-cx="0" data-cy="0" data-half="0.5" data-duration="2" data-live></div>
+          <h2>Three crossing trajectories</h2>
+        </section>
+        <section class="figure">
+          <div class="backdrop" data-trajectories="tint-trajectories.js" data-cx="0" data-cy="0" data-half="0.5"></div>
+          <h2>A trajectory of three points</h2>
+        </section>
+      </div>
+    </div>
+    <script src="../../theme/vendor/reveal/reveal.js"></script>
+    <script src="../../theme/beeson.js"></script>
+    <script>
+      Beeson.start({ transition: 'none' });
+    </script>
+  </body>
+</html>
