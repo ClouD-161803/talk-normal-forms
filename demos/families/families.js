@@ -6,12 +6,14 @@
 // a drawing is run over and over while its slide is shown, from its start each time the slide is
 // shown. it is drawn complete in the print view, under ?still, and under reduced motion. the colors
 // are taken from a colormap of matplotlib, as in the figures of DyLAN. on a dark ground, the dark end
-// of a colormap is moved toward the other end until its color has a contrast of 3:1 against the ground.
+// of a colormap is moved toward the other end until its color has a contrast of 3:1 against the ground,
+// or of 1.6:1 where the colormap is used whole.
 //
 // section: the section q3 = 0 of the center manifold of the Earth-Moon L2 (Fig. 6 of Jorba and
 // Masdemont 1999). the energy h rises from 0.2 to 1.0. each orbit is drawn as the dots of its
 // crossings, colored by its rotation number in plasma, and the dots are carried around the curve of
-// the orbit while its rotation number changes. the halo orbits are born at the boundary.
+// the orbit while its rotation number changes. the boundary of the section, the planar Lyapunov orbit,
+// is not drawn, and the halo orbits are born at it.
 //
 // tori: the unstable 2-tori near L5 in the bicircular problem (Figs. 8 and 9 of Simó et al. 1995), in
 // the plane of the primaries. on each of the ten computed tori, orbits that start on its invariant
@@ -31,7 +33,9 @@
   };
   // the least seconds between two frames, so that a slow machine draws at most 30 frames per second
   const FRAME = 1 / 31;
+  // the least contrast of the ends of a colormap with the ground, and the same for a colormap used whole
   const CONTRAST = 3;
+  const FAINT = 1.6;
 
   const still = () => {
     const q = location.search;
@@ -61,10 +65,10 @@
   };
 
   // the ends of a colormap on a ground, each moved toward the other until its color is told from the ground
-  function ends(name, ground) {
+  function ends(name, ground, least) {
     let [lo, hi] = [0, 1];
-    while (lo < hi - 0.3 && contrast(sample(name, lo), ground) < CONTRAST) lo += 0.01;
-    while (hi > lo + 0.3 && contrast(sample(name, hi), ground) < CONTRAST) hi -= 0.01;
+    while (lo < hi - 0.3 && contrast(sample(name, lo), ground) < least) lo += 0.01;
+    while (hi > lo + 0.3 && contrast(sample(name, hi), ground) < least) hi -= 0.01;
     return [lo, hi];
   }
 
@@ -74,7 +78,8 @@
     const tone = (name, fallback) => css.getPropertyValue(name).trim() || fallback;
     const bg = tone('--bg', '#050505');
     const ground = /^#[0-9a-f]{6}$/i.test(bg) ? rgb(bg.slice(1)) : [5, 5, 5];
-    const range = Object.fromEntries(Object.keys(STOPS).map((name) => [name, ends(name, ground)]));
+    const ranges = (least) => Object.fromEntries(Object.keys(STOPS).map((name) => [name, ends(name, ground, least)]));
+    const [range, wide] = [ranges(CONTRAST), ranges(FAINT)];
     const dark = luminance(ground) < 0.2;
     return {
       dark,
@@ -85,9 +90,10 @@
       purple: tone('--data-7', '#cc79a7'),
       ground: bg,
       // the color of a colormap at v, from 0 at its lower end to 1 at its upper end. with whole, the
-      // colormap is not cut short on a light ground, as in a figure of DyLAN on white
+      // colormap is not cut short on a light ground, as in a figure of DyLAN on white, and on a dark
+      // ground it loses only the colors that are lost in the ground
       map(name, v, alpha = 1, whole = false) {
-        const [lo, hi] = whole && !dark ? [0, 1] : range[name];
+        const [lo, hi] = !whole ? range[name] : dark ? wide[name] : [0, 1];
         const [r, g, b] = sample(name, lo + (hi - lo) * clamp(v));
         return `rgba(${Math.round(r)}, ${Math.round(g)}, ${Math.round(b)}, ${alpha})`;
       },
@@ -98,16 +104,6 @@
   function view(d, [x0, x1, y0, y1], margin) {
     const s = Math.min((d.w - 2 * margin) / (x1 - x0), (d.h - 2 * margin) / (y1 - y0));
     return { s, x: d.w / 2 - s * (x0 + x1) / 2, y: d.h / 2 + s * (y0 + y1) / 2 };
-  }
-
-  // a closed curve through n points of the buffer p from the offset o, smoothed through the midpoints
-  function closed(g, p, o, n, v) {
-    const X = (i) => v.x + v.s * p[o + 2 * (i % n)];
-    const Y = (i) => v.y - v.s * p[o + 2 * (i % n) + 1];
-    g.beginPath();
-    g.moveTo((X(n - 1) + X(0)) / 2, (Y(n - 1) + Y(0)) / 2);
-    for (let i = 0; i < n; i++) g.quadraticCurveTo(X(i), Y(i), (X(i) + X(i + 1)) / 2, (Y(i) + Y(i + 1)) / 2);
-    g.closePath();
   }
 
   function decode(text) {
@@ -124,7 +120,7 @@
   // an orbit is drawn as dots of radius dot, about spacing apart at the last energy. where the rotation
   // number of an orbit changes fast, the orbit has fewer dots, so that no dot moves faster than speed
   // per second
-  const SECTION = { rise: 13, rest: 3, fade: 0.7, spacing: 6.5, speed: 330, dot: 1.15 };
+  const SECTION = { rise: 13, rest: 3, fade: 0.7, spacing: 7, speed: 330, dot: 1.4 };
   KINDS.section = {
     seconds: SECTION.rise + SECTION.rest + SECTION.fade,
     prepare(data) {
@@ -185,15 +181,6 @@
           return Math.max(4, Math.round(Math.min(px / SECTION.spacing, (2 * SECTION.speed) / (state.rates[c] * px)) / 2));
         });
       }
-      g.lineJoin = 'round';
-      closed(g, p, 0, data.boundary, v);
-      g.globalAlpha = 0.055;
-      g.fillStyle = colors.text;
-      g.fill();
-      g.globalAlpha = 0.3;
-      g.strokeStyle = colors.text;
-      g.lineWidth = 1;
-      g.stroke();
       // the dots of an orbit are its crossings j returns before and after its first point. on its curve,
       // the crossing j is j times the rotation number of a turn away from the first point, measured in
       // the length of the curve, so the dots are carried around the curve while the energy rises
@@ -332,7 +319,7 @@
       // on a dark ground the colormap is turned around, so that the largest torus is the closest to the ground in both modes
       const color = (alpha, opacity) => {
         const value = (alpha - lo) / (hi - lo);
-        return colors.map('magma', colors.dark ? 1 - value : value, opacity, true);
+        return colors.map('magma', colors.dark ? 1 - value : value, opacity, !colors.dark);
       };
       d.canvas.style.opacity = done ? 1 : smooth((this.seconds - t) / TORI.fade);
 
@@ -424,15 +411,16 @@
   // the seconds of the trace of the orbits, of the wait in standard coordinates, of the change of
   // coordinates, and of the rest in the coordinates of the normal form. there are levels orbits in each
   // of the four sectors of the saddle, of points points each, and the change is drawn from frames stages
-  const NORMAL = { trace: 3.4, wait: 1.4, morph: 4.5, rest: 3.5, levels: 16, points: 96, frames: 8, reach: 1.3, grid: 0.2, glow: [[24, 0.06], [13, 0.11], [6.5, 0.2]] };
+  const NORMAL = { trace: 3.4, wait: 1.4, morph: 4.5, rest: 3.5, levels: 16, points: 96, frames: 8, reach: 1.3, far: 1.2, grid: 0.2, glow: [[24, 0.06], [13, 0.11], [6.5, 0.2]] };
   // the generating function of the change of coordinates, a sum of c x^a y^b written as [c, a, b]. it is
-  // chosen for the look and is not the one of a model. the change is its flow over the time 1, a
-  // canonical change close to the identity, as in the Lie series method
+  // chosen for the look and is not the one of a model. it is multiplied by exp(-(x^2 + y^2) / far^2), so
+  // that no point is thrown out of the picture. the change is the flow of this product over the time 1,
+  // a canonical change close to the identity, as in the Lie series method
   const GENERATOR = [
-    [0.2, 3, 0], [-0.17, 1, 2], [0.13, 2, 1], [0.09, 0, 3],
-    [0.1, 4, 0], [-0.14, 2, 2], [0.07, 1, 3], [-0.06, 0, 4],
-    [-0.04, 5, 0], [0.1, 3, 2], [0.06, 2, 3], [-0.07, 1, 4],
-    [0.02, 6, 0], [-0.07, 4, 2], [0.06, 2, 4],
+    [0.4, 3, 0], [-0.34, 1, 2], [0.26, 2, 1], [0.18, 0, 3],
+    [0.2, 4, 0], [-0.28, 2, 2], [0.14, 1, 3], [-0.12, 0, 4],
+    [-0.08, 5, 0], [0.2, 3, 2], [0.12, 2, 3], [-0.14, 1, 4],
+    [0.04, 6, 0], [-0.14, 4, 2], [0.12, 2, 4],
   ];
   KINDS['normal-form'] = {
     computed: true,
@@ -443,12 +431,14 @@
       const stages = [points];
       const h = sign / (2 * NORMAL.frames);
       const field = (x, y) => {
-        let [dx, dy] = [0, 0];
+        let [G, Gx, Gy] = [0, 0, 0];
         for (const [c, a, b] of GENERATOR) {
-          if (b) dx += c * b * x ** a * y ** (b - 1);
-          if (a) dy -= c * a * x ** (a - 1) * y ** b;
+          G += c * x ** a * y ** b;
+          if (a) Gx += c * a * x ** (a - 1) * y ** b;
+          if (b) Gy += c * b * x ** a * y ** (b - 1);
         }
-        return [dx, dy];
+        const E = Math.exp(-(x * x + y * y) / NORMAL.far ** 2);
+        return [(Gy - (2 * y * G) / NORMAL.far ** 2) * E, -(Gx - (2 * x * G) / NORMAL.far ** 2) * E];
       };
       for (let k = 0; k < NORMAL.frames; k++) {
         const next = Float32Array.from(stages[k]);
@@ -551,11 +541,14 @@
           : line.kind === 'stable' ? colors.violet : colors.accent;
         // the two manifolds glow: each is drawn wide and faint under its line
         if (line.kind === 'stable' || line.kind === 'unstable') {
+          // with round ends, the four wide lines would add up to a disk at the saddle
+          g.lineCap = 'butt';
           for (const [width, alpha] of NORMAL.glow) {
             g.globalAlpha = alpha;
             g.lineWidth = width;
             g.stroke();
           }
+          g.lineCap = 'round';
         }
         g.globalAlpha = line.kind === 'grid' ? 0.2 * smooth(traced * 3) : 1;
         g.lineWidth = line.kind === 'orbit' ? 1.4 : line.kind === 'grid' ? 1 : 2.8;
