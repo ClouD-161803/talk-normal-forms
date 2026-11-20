@@ -36,7 +36,14 @@ html.reveal-print .reveal .slides section .plot-tex > .z-axis > .z-osc { animati
 .reveal .slides section .plot-tex > .z-axis > .z-lbl { position: absolute; left: 18px; top: -6px; translate: 0 -50%; font-size: 28px; white-space: nowrap; }
 .reveal .slides section .plot-tex > span { position: absolute; font-size: 28px; line-height: 1; white-space: nowrap; translate: -50% -50%; padding: 4px 6px; background: var(--bg); }
 .reveal .slides section:not([data-complete]) .plot-tex > .fragment.visible:not(.current-fragment) { opacity: 1; }
-.reveal .slides section .math.block-a { font-size: 40px; margin: 4px 0 10px; }
+.reveal .slides section .math.block-a { font-size: 38px; margin: 4px 0 18px; }
+.reveal .slides section.lin-stab > h2 { margin-bottom: 28px; }
+.reveal .slides section.lin-stab > p,
+.reveal .slides section.lin-stab > ul { font-size: 42px; line-height: 1.32; }
+.reveal .slides section.lin-stab > p { margin: 0 0 10px; }
+.reveal .slides section.lin-stab > ul { margin: 0 0 18px; }
+.reveal .slides section.lin-stab > ul > li { margin-bottom: 6px; }
+.reveal .slides section.lin-stab > .math { font-size: 42px; margin: 8px 0 18px; }
 .reveal .slides section#cr3bp-dynamics > :is(.math, p, ol) { position: absolute; left: 0; top: 0; margin: 0; max-width: none; }
 .reveal .slides section#cr3bp-dynamics > .math { font-size: 40px; }
 .reveal .slides section#cr3bp-dynamics span[class*="k-"] { display: inline-block; }
@@ -187,9 +194,9 @@ html[data-theme="light"] { --yellow: #8f6a00; }
 
   .reveal .slides section.stab-slide .takeaway {
     position: absolute;
-    right: 120px;
+    right: 235px;
     bottom: 44px;
-    font-size: 25px;
+    font-size: 24px;
     font-style: italic;
     color: var(--subtle);
     margin: 0;
@@ -253,19 +260,19 @@ try {
   <div class="backdrop" data-backdrop="tubes" data-cx="0.42" data-cy="0" data-half="0.6"></div>
 </section>
 
-<section class="narrow" data-timing="140">
+<section class="narrow lin-stab" data-timing="140">
   <h2 style="width: 1680px">Further motivation: linear stability</h2>
   <p>Near-equilibrium dynamics:</p>
-  <div class="math fragment" data-fragment-index="1" data-plot-show="quiver-saddle" style="translate: 0px -21px">\[\delta\dot{\vb x} = \vb A\,\delta\vb x, \qquad \vb A = \vb D\vb f(\vb x_{\mathcal{L}_1}).\]</div>
-  <p class="fragment" data-fragment-index="2" style="translate: 0px -21px">The eigenspaces of \(\vb A\) at \(\mathcal{L}_1\):</p>
-  <ul style="translate: 0px -21px">
+  <div class="math fragment" data-fragment-index="1" data-plot-show="quiver-saddle">\[\delta\dot{\vb x} = \vb A\,\delta\vb x, \qquad \vb A = \vb D\vb f(\vb x_{\mathcal{L}_1}).\]</div>
+  <p class="fragment" data-fragment-index="2">The eigenspaces of \(\vb A\) at \(\mathcal{L}_1\):</p>
+  <ul>
     <li class="fragment" data-fragment-index="2" data-plot-show="stable-line">\(\lambda&lt;0\): <span class="tone-violet stab">stable</span> eigendirection \(E^s\),</li>
     <li class="fragment" data-fragment-index="3" data-plot-show="unstable-line">\(\lambda&gt;0\): <span class="tone-accent unst">unstable</span> eigendirection \(E^u\),</li>
     <li class="fragment" data-fragment-index="6" data-plot-hide="quiver-saddle in-0 in-1 out-0 out-1 hyp0-0 hyp0-1 hyp0-2 hyp0-3 hyp1-0 hyp1-1 hyp1-2 hyp1-3" data-plot-show="quiver-center">\(\pm \mathrm{i}\omega_{xy}\): <span class="tone-blue">planar center</span> \(E^c_{xy}\).</li>
   </ul>
-  <p class="fragment" data-fragment-index="8" style="translate: 0px -12px">By \(z \to -z\) symmetry, vertical decouples:</p>
-  <div class="math block-a fragment" data-fragment-index="8" style="translate: 0px -12px">\[\vb A = \begin{pmatrix} \vb A_{xy} &amp; \vb 0 \\ \vb 0 &amp; \class{tone-blue}{\vb A_z} \end{pmatrix} \;\Longrightarrow\; \pm \mathrm{i}\omega_z\!: \; \class{tone-blue}{E^c_z}.\]</div>
-  <ul style="translate: 0px -4px" class="dots">
+  <p class="fragment" data-fragment-index="8">By \(z \to -z\) symmetry, vertical decouples:</p>
+  <div class="math block-a fragment" data-fragment-index="8">\[\vb A = \begin{pmatrix} \vb A_{xy} &amp; \vb 0 \\ \vb 0 &amp; \class{tone-blue}{\vb A_z} \end{pmatrix} \;\Longrightarrow\; \pm \mathrm{i}\omega_z\!: \; \class{tone-blue}{E^c_z}.\]</div>
+  <ul class="dots">
     <li class="fragment" data-fragment-index="9">Can we do better than linear?</li>
   </ul>
   <div class="plot bare figure-box beside" data-plot="saddle" data-group="g1"></div>
