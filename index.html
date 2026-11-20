@@ -21,19 +21,20 @@
 .reveal .slides section .plot-tex { pointer-events: none; }
 .reveal .slides section .plot .grid { opacity: 0.12; }
 .reveal .slides section:has(.tilt) { perspective: none; }
-.reveal .slides section:has(.tilt) .figure-box.beside { transition: transform 1.2s cubic-bezier(0.65, 0, 0.35, 1); transform-style: preserve-3d; }
-.reveal .slides section:has(.tilt.visible) .figure-box.beside { transform: perspective(2400px) rotateX(45deg) rotateZ(-25deg) scale(0.9); }
-.reveal .slides section .plot-tex > .z-axis { position: absolute; left: var(--z-left); top: var(--z-top); width: 0; height: 420px; translate: -1px -50%; border-left: 2.5px dashed var(--blue); transform-origin: 50% 50%; transform: rotateX(-90deg); opacity: 0; transition: opacity 0.6s ease-out 0.6s; }
-.reveal .slides section:has(.tilt.visible) .plot-tex > .z-axis { opacity: 1; }
-.reveal .slides section .plot-tex > .z-axis::before,
-.reveal .slides section .plot-tex > .z-axis::after { content: ""; position: absolute; left: -9px; width: 16px; border-top: 2px solid var(--blue); }
-.reveal .slides section .plot-tex > .z-axis::before { top: 24px; }
-.reveal .slides section .plot-tex > .z-axis::after { bottom: 24px; }
-.reveal .slides section .plot-tex > .z-axis > .z-osc { position: absolute; left: -1px; top: 50%; width: 16px; height: 16px; margin: -8px 0 0 -8px; border-radius: 50%; border: 3px solid var(--blue); background: var(--bg); box-sizing: border-box; animation: z-bob 2.6s ease-in-out infinite alternate; }
-@keyframes z-bob { from { translate: 0 -178px; } to { translate: 0 178px; } }
-@media (prefers-reduced-motion: reduce) { .reveal .slides section .plot-tex > .z-axis > .z-osc { animation: none; translate: 0 -120px; } }
-html.reveal-print .reveal .slides section .plot-tex > .z-axis > .z-osc { animation: none; translate: 0 -120px; }
-.reveal .slides section .plot-tex > .z-axis > .z-lbl { position: absolute; left: 18px; top: -6px; translate: 0 -50%; font-size: 28px; white-space: nowrap; }
+.reveal .slides section:has(.tilt) .figure-box.beside:not(.z-overlay) { transition: transform 1.2s cubic-bezier(0.65, 0, 0.35, 1); transform-style: preserve-3d; }
+.reveal .slides section:has(.tilt.visible) .figure-box.beside:not(.z-overlay) { transform: perspective(2400px) rotateX(45deg) rotateZ(-25deg) scale(0.9); }
+.reveal .slides section .figure-box.z-overlay { pointer-events: none; opacity: 0; transition: opacity 0.45s ease-out 0.95s; }
+.reveal .slides section:has(.tilt.visible) .figure-box.z-overlay { opacity: 1; }
+.reveal .slides section .z-overlay > .z-axis { position: absolute; left: var(--z-left); top: var(--z-top); width: 0; height: 360px; translate: -1px -50%; border-left: 2.5px dashed var(--blue); }
+.reveal .slides section .z-overlay > .z-axis::before,
+.reveal .slides section .z-overlay > .z-axis::after { content: ""; position: absolute; left: -9px; width: 16px; border-top: 2px solid var(--blue); }
+.reveal .slides section .z-overlay > .z-axis::before { top: 18px; }
+.reveal .slides section .z-overlay > .z-axis::after { bottom: 18px; }
+.reveal .slides section .z-overlay > .z-axis > .z-osc { position: absolute; left: -1px; top: 50%; width: 16px; height: 16px; margin: -8px 0 0 -8px; border-radius: 50%; border: 3px solid var(--blue); background: var(--bg); box-sizing: border-box; animation: z-bob 2.6s ease-in-out infinite alternate; }
+@keyframes z-bob { from { translate: 0 -148px; } to { translate: 0 148px; } }
+@media (prefers-reduced-motion: reduce) { .reveal .slides section .z-overlay > .z-axis > .z-osc { animation: none; translate: 0 -105px; } }
+html.reveal-print .reveal .slides section .z-overlay > .z-axis > .z-osc { animation: none; translate: 0 -105px; }
+.reveal .slides section .z-overlay > .z-axis > .z-lbl { position: absolute; left: 16px; top: 8px; translate: 0 -50%; font-size: 28px; white-space: nowrap; }
 .reveal .slides section .plot-tex > span { position: absolute; font-size: 28px; line-height: 1; white-space: nowrap; translate: -50% -50%; padding: 4px 6px; background: var(--bg); }
 .reveal .slides section:not([data-complete]) .plot-tex > .fragment.visible:not(.current-fragment) { opacity: 1; }
 .reveal .slides section .math.block-a { font-size: 38px; margin: 4px 0 18px; }
@@ -280,10 +281,12 @@ try {
     <span class="tone-subtle" style="left: 487px; top: 820px">\(\delta x\) [km]</span>
     <span class="tone-subtle" style="left: 163px; top: 106px">\(\delta y\) [km]</span>
     <span style="left: 487px; top: 405px">\(\mathcal{L}_1\)</span>
-    <span class="tone-violet fragment" data-fragment-index="2" style="left: 789px; top: 240px">\(E^s\)</span>
-    <span class="tone-accent fragment" data-fragment-index="3" style="left: 174px; top: 240px">\(E^u\)</span>
+    <span class="tone-violet fragment" data-fragment-index="2" style="left: 794px; top: 270px">\(E^s\)</span>
+    <span class="tone-accent fragment" data-fragment-index="3" style="left: 178px; top: 268px">\(E^u\)</span>
     <span class="tone-blue fragment" data-fragment-index="6" style="left: 487px; top: 135px">\(E^c_{xy}\)</span>
-    <div class="z-axis" style="--z-left: 487px; --z-top: 443px"><div class="z-osc"></div><span class="z-lbl"><span class="tone-blue">\(E^c_z\)</span> <span class="tone-subtle">(\(\delta z\))</span></span></div>
+  </div>
+  <div class="figure-box beside z-overlay" data-group="g1">
+    <div class="z-axis" style="--z-left: 487px; --z-top: 421px"><div class="z-osc"></div><span class="z-lbl"><span class="tone-blue">\(E^c_z\)</span> <span class="tone-subtle">(\(\delta z\))</span></span></div>
   </div>
   <span class="fragment" data-fragment-index="4" data-highlight="stab" data-tone="violet"></span>
   <span class="fragment" data-fragment-index="4" data-highlight="unst"></span>
@@ -364,7 +367,7 @@ try {
   <div class="plot bare ps-box" data-plot="local-phase-space" data-plot-tab="ps-vert"></div>
   <div class="plot bare mu-box" data-plot="mu-stability-line" data-plot-paused data-plot-frame="0"></div>
 
-  <p class="takeaway fragment" data-fragment-index="10">Every nonlinear entry is a normal form.</p>
+  <p class="takeaway fragment" data-fragment-index="10">Every nonlinear proof uses normal forms.</p>
 
   <div class="foot">Gascheau 1843; Routh 1875; Deprit 1967; Markeev 1969; Benettin–Fassò–Guzzo 1998; Cárcamo-Díaz et al. 2020.</div>
 
