@@ -1,58 +1,77 @@
-"""The plot of the section of the center manifold, written into the JSON script of a deck.
+"""The section of the center manifold at a ladder of energies, written for the drawing ``section``.
 
 The center manifold of the Earth-Moon :math:`L_2` is cut by :math:`q_3 = 0` with :math:`p_3 > 0`
 on a level :math:`h` of its Hamiltonian (Fig. 6 of Jorba and Masdemont 1999). DyLAN reduced the
-Hamiltonian to the center manifold at degree 20 and computed the section at 39 energies from 0.05
-to 1.0. The file sections.npz holds, at each energy, the boundary of the section, the vertical
-Lyapunov orbit, the halo orbits, and 80 crossings of twelve orbits about the vertical Lyapunov
-orbit and of four orbits about each halo orbit. The orbits start at fixed fractions of the way
-from their fixed point to the boundary.
+Hamiltonian to the center manifold at degree 20 and computed the section at a ladder of energies
+from 0.2 to 1.0. The file sections.npz holds, at each energy, the boundary of the section, the
+vertical Lyapunov orbit, the halo orbits, and 80 crossings of the orbits about the vertical
+Lyapunov orbit and about each halo orbit. The orbits start at fixed fractions of the way from
+their fixed point to the boundary. The file was written by
+``_support/_python/center-manifold-section-ladder.py`` in the vault.
 
 The crossings of an orbit lie on a closed curve around its fixed point. Function ``closed_curve``
-returns this curve as a polygon, and function ``evenly_spaced`` returns dots at even steps of its
-length. A frame of the plot is one energy. Between two frames, each dot thus moves to the same
-fraction of the length of its curve, and the curves are deformed with the energy.
+returns this curve as a polygon, and function ``evenly_spaced`` returns points at even steps of its
+length. Each curve has the same number of points at every energy. In the browser,
+demos/families/families.js thus draws the section between two energies of the ladder from points
+interpolated in :math:`h`, and it colors each curve by its rotation number, as the figure of the
+DyLAN demonstration does.
 
-Run it with a Python that has numpy: ``python data/section.py``, or with the path of another deck.
+Run it with a Python that has numpy: ``python data/section.py`` writes demos/families/section.js.
 """
 
+import base64
+import json
 import math
-import sys
 from pathlib import Path
 
 import numpy as np
 
-from pendulum import DECK, write_script
-
-DATA = Path(__file__).resolve().with_name("sections.npz")
-# the plot is drawn in units of 1e-3 of the coordinates of the center manifold
-UNIT = 1e-3
+HERE = Path(__file__).resolve().parent
+DATA = HERE / "sections.npz"
+OUT = HERE.parent / "demos" / "families" / "section.js"
 FIRST_ENERGY = 0.2
-ENERGY_STEP = 0.05
-CENTRAL_CURVES = slice(1, None, 2)
-ISLAND_CURVES = slice(1, None, 2)
-DOTS = 520
 POLYGON = 720
-SECONDS = 12
+# the Fourier series of a closed curve, and the weight of the penalty on its second derivative
+HARMONICS = 24
+STIFFNESS = 2e-7
+BOUNDARY_POINTS = 240
+# the points of all curves at the last energy, shared in proportion to the lengths of the curves
+POINTS = 3000
+FEWEST_POINTS = 28
+# the largest coordinate is stored as this 16-bit integer
+LARGEST = 30000
 DOWN, RIGHT, MIRROR = np.array([0.0, -1.0]), np.array([1.0, 0.0]), np.array([-1.0, 1.0])
 
 
-def closed_curve(points, center, start):
+def closed_curve(points, center, start, mirrored=False):
     """Returns the closed curve through the crossings of an orbit around a fixed point as a
     polygon, counterclockwise from its point on the ray from the fixed point along ``start``.
 
-    The crossings are ordered by their polar angle about the fixed point, in the coordinates in
-    which their second moments about it are the identity. In these coordinates the curve is close
-    to a circle, and the distance from the fixed point is interpolated linearly in the angle."""
+    The curve is written in the polar angle about the fixed point, in the coordinates in which the
+    second moments of the crossings about it are the identity. In these coordinates the curve is
+    close to a circle. The distance from the fixed point is fitted to the crossings as a Fourier
+    series of the angle by least squares, with a penalty on its second derivative. An orbit close to
+    a resonance leaves gaps between its crossings, and the series thus closes them with a smooth
+    arc. A curve around the vertical Lyapunov orbit is its own mirror image in the first
+    coordinate, and with ``mirrored`` the mirror images of its crossings are fitted as well."""
     offsets = points - center
+    if mirrored:
+        offsets = np.vstack([offsets, offsets * MIRROR])
     values, vectors = np.linalg.eigh(offsets.T @ offsets / len(offsets))
     whiten = vectors @ np.diag(values**-0.5) @ vectors.T
     white = offsets @ whiten
     angle, radius = np.arctan2(white[:, 1], white[:, 0]), np.hypot(white[:, 0], white[:, 1])
-    order = np.argsort(angle)
+    orders = np.arange(1, HARMONICS + 1)
+
+    def series(at):
+        return np.hstack([np.ones((len(at), 1)), np.cos(np.outer(at, orders)), np.sin(np.outer(at, orders))])
+
+    design = series(angle)
+    penalty = STIFFNESS * len(angle) * np.diag(np.concatenate([[0.0], orders**4.0, orders**4.0]))
+    coefficients = np.linalg.solve(design.T @ design + penalty, design.T @ radius)
     first = start @ whiten
     grid = math.atan2(first[1], first[0]) + 2 * math.pi * np.arange(POLYGON) / POLYGON
-    radius = np.interp(grid, angle[order], radius[order], period=2 * math.pi)
+    radius = series(grid) @ coefficients
     return center + (radius[:, None] * np.column_stack([np.cos(grid), np.sin(grid)])) @ np.linalg.inv(whiten)
 
 
@@ -70,72 +89,78 @@ def evenly_spaced(polygon, count):
     return np.column_stack([np.interp(at, length, closed[:, 0]), np.interp(at, length, closed[:, 1])])
 
 
-def flat(points):
-    return [int(round(float(value) / UNIT)) for value in np.asarray(points).ravel()]
+def rotation_number(points, center):
+    """Returns the mean angle in turns per return that carries the crossings of an orbit about its
+    fixed point, as in the DyLAN demonstration."""
+    angles = np.unwrap(np.arctan2(points[:, 1] - center[1], points[:, 0] - center[0]))
+    return abs(angles[-1] - angles[0]) / (2 * math.pi * (len(points) - 1))
 
 
-def section_plot():
+def section():
     data = np.load(DATA)
-    energies = data["energies"]
-    born = np.isfinite(data["halos"]).all(axis=(1, 2))
-    steps = (energies - FIRST_ENERGY) / ENERGY_STEP
-    # the energies of the frames, and the first energy at which the halo orbits were computed
-    keep = np.flatnonzero((steps > -1e-6) & ((np.abs(steps - np.round(steps)) < 1e-6) | (np.arange(len(energies)) == np.argmax(born))))
-    directions = 2 * math.pi * np.arange(len(data["boundary_angles"]) - 1) / (len(data["boundary_angles"]) - 1)
+    keep = np.flatnonzero(data["energies"] > FIRST_ENERGY - 1e-9)
+    energies = data["energies"][keep]
+    born = np.isfinite(data["halos"][keep]).all(axis=(1, 2))
+    first_born = int(np.argmax(born))
+    polar = 2 * math.pi * np.arange(BOUNDARY_POINTS) / BOUNDARY_POINTS
 
-    def curves(frame):
-        """Returns the boundary, the curves about the vertical orbit, and the curves about the
-        halo orbits at one energy, as polygons that start at mirrored points."""
-        radius = data["boundary_radii"][frame][:-1]
-        boundary = np.roll(np.column_stack([radius * np.cos(directions), radius * np.sin(directions)]), -3 * len(radius) // 4, axis=0)
-        central = [closed_curve(points.astype(float), data["center"][frame], DOWN) for points in data["central"][frame][CENTRAL_CURVES]]
-        islands = []
-        if born[frame]:
-            for side, mirror in enumerate((1.0, MIRROR)):
-                for points in data["islands"][frame][side][ISLAND_CURVES]:
-                    islands.append(closed_curve(points * mirror, data["halos"][frame][side] * mirror, RIGHT) * mirror)
-        return [boundary], central, islands
+    def curves(index):
+        """Returns the polygon and the rotation number of each curve at one energy, first those
+        about the vertical Lyapunov orbit and then those about the halo orbits. The curves about
+        the two halo orbits start at mirrored points. Before the halo orbits are born, their curves
+        are those of the first energy with them, where the drawing fades them in."""
+        frame = keep[index]
+        out = []
+        for points in data["central"][frame]:
+            points = points[np.isfinite(points).all(axis=1)].astype(float)
+            out.append((closed_curve(points, data["center"][frame], DOWN, True), rotation_number(points, data["center"][frame])))
+        frame = keep[max(index, first_born)]
+        for side, mirror in enumerate((1.0, MIRROR)):
+            for points in data["islands"][frame][side]:
+                points = points[np.isfinite(points).all(axis=1)].astype(float)
+                halo = data["halos"][frame][side]
+                out.append((closed_curve(points * mirror, halo * mirror, RIGHT) * mirror, rotation_number(points, halo)))
+        return out
 
-    last = curves(keep[-1])
-    perimeters = [[lengths(polygon)[1][-1] for polygon in group] for group in last]
-    per_length = DOTS / sum(sum(group) for group in perimeters)
-    counts = [[max(8, round(per_length * perimeter)) for perimeter in group] for group in perimeters]
-    print(f"{len(keep)} energies from {energies[keep[0]]:.3f} to {energies[keep[-1]]:.3f}, "
-          f"dots on the boundary {counts[0]}, about the vertical orbit {counts[1]}, about the halo orbits {counts[2]}")
+    last = curves(len(keep) - 1)
+    perimeters = np.array([lengths(polygon)[1][-1] for polygon, _ in last])
+    counts = np.maximum(FEWEST_POINTS, np.round(POINTS * perimeters / perimeters.sum())).astype(int)
+    central = len(data["central"][keep[0]])
 
-    dots = {"boundary": [], "central": [], "islands": [], "vertical": [], "halos": []}
-    for frame in keep:
-        groups = curves(frame)
-        for name, group, count in zip(("boundary", "central", "islands"), groups, counts):
-            dots[name].append([value for polygon, n in zip(group, count) for value in flat(evenly_spaced(polygon, n))])
-        dots["vertical"].append(flat(data["center"][frame]))
-        dots["halos"].append(flat(data["halos"][frame]) if born[frame] else [])
-
-    edge = last[0][0] / UNIT
-    pad = 40
-    x_range = [math.floor(edge[:, 0].min()) - pad, math.ceil(edge[:, 0].max()) + pad]
-    y_range = [math.floor(edge[:, 1].min()) - pad, math.ceil(edge[:, 1].max()) + pad]
-    shown = energies[keep]
+    frames, rotations, vertical, halos = [], [], [], []
+    for index, frame in enumerate(keep):
+        radius = np.interp(polar, data["boundary_angles"], data["boundary_radii"][frame])
+        rows = [np.column_stack([radius * np.cos(polar), radius * np.sin(polar)])]
+        both = curves(index)
+        rows += [evenly_spaced(polygon, count) for (polygon, _), count in zip(both, counts)]
+        frames.append(np.vstack(rows))
+        rotations.append([round(float(rotation), 5) for _, rotation in both])
+        vertical.append(data["center"][frame])
+        halos.append(data["halos"][keep[max(index, first_born)]].ravel())
+    frames = np.array(frames)
+    unit = float(np.abs(frames).max()) / LARGEST
+    values = [r for row, alive in zip(rotations, born) for r in (row if alive else row[:central])]
+    print(f"{len(keep)} energies from {energies[0]:.3f} to {energies[-1]:.3f}, halo orbits from {energies[first_born]:.3f}, "
+          f"{central} + {len(counts) - central} curves of {counts.min()} to {counts.max()} points, {frames.shape[1]} points per energy, "
+          f"rotation numbers {min(values):.4f} to {max(values):.4f}")
+    integers = lambda rows: [[int(round(float(v) / unit)) for v in row] for row in rows]
     return {
-        "parameter": {"label": "$h$", "digits": 2},
-        "hold": 1.2,
-        "fade": 0.6,
-        "panels": [{"id": "section", "equal": True, "axes": False, "margin": [8, 8, 8, 8],
-                    "x": {"range": x_range, "ticks": []}, "y": {"range": y_range, "ticks": []}}],
-        "marks": [
-            {"id": "boundary", "panel": "section", "kind": "points", "tone": "muted", "size": 3},
-            {"id": "central", "panel": "section", "kind": "points", "tone": "violet", "size": 4},
-            {"id": "islands", "panel": "section", "kind": "points", "tone": "accent", "size": 4},
-            {"id": "vertical", "panel": "section", "kind": "points", "tone": "violet", "size": 9, "hollow": True},
-            {"id": "halos", "panel": "section", "kind": "points", "tone": "accent", "size": 9, "hollow": True},
-            {"id": "energy", "panel": "section", "kind": "label", "tone": "muted", "anchor": "start", "dy": -16},
-        ],
-        "tabs": [{"name": "energy", "label": "energy", "values": [round(float(e), 3) for e in shown],
-                  "times": [round(float(SECONDS * (e - shown[0]) / (shown[-1] - shown[0])), 3) for e in shown],
-                  "data": {**dots, "energy": {"at": [x_range[0], y_range[0]], "text": [f"$h = {e:.2f}$" for e in shown]}}}],
+        "unit": unit,
+        "energies": [round(float(e), 4) for e in energies],
+        "born": first_born,
+        "boundary": BOUNDARY_POINTS,
+        "central": central,
+        "counts": [int(c) for c in counts],
+        "rotation": rotations,
+        "range": [min(values), max(values)],
+        "vertical": integers(vertical),
+        "halos": integers(halos),
+        "points": base64.b64encode(np.round(frames / unit).astype("<i2").tobytes()).decode(),
     }
 
 
 if __name__ == "__main__":
-    deck = Path(sys.argv[1]) if len(sys.argv) > 1 else DECK
-    deck.write_text(write_script(deck.read_text(), "section", section_plot()))
+    OUT.parent.mkdir(parents=True, exist_ok=True)
+    text = "(window.FamiliesData ??= {}).section = " + json.dumps(section(), separators=(",", ":")) + ";\n"
+    OUT.write_text(text)
+    print(f"{OUT.name}: {len(text)} bytes")
