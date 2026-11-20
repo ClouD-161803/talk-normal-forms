@@ -115,11 +115,14 @@ def section():
             points = points[np.isfinite(points).all(axis=1)].astype(float)
             out.append((closed_curve(points, data["center"][frame], DOWN, True), rotation_number(points, data["center"][frame])))
         frame = keep[max(index, first_born)]
+        sides = []
         for side, mirror in enumerate((1.0, MIRROR)):
-            for points in data["islands"][frame][side]:
-                points = points[np.isfinite(points).all(axis=1)].astype(float)
-                halo = data["halos"][frame][side]
-                out.append((closed_curve(points * mirror, halo * mirror, RIGHT) * mirror, rotation_number(points, halo)))
+            halo = data["halos"][frame][side]
+            orbits = [points[np.isfinite(points).all(axis=1)].astype(float) for points in data["islands"][frame][side]]
+            sides.append([(closed_curve(points * mirror, halo * mirror, RIGHT) * mirror, rotation_number(points, halo)) for points in orbits])
+        # the two halo orbits are mirror images, so a curve and its mirror image share the mean of their two rotation numbers
+        for side in sides:
+            out += [(polygon, (left + right) / 2) for (polygon, _), (_, left), (_, right) in zip(side, *sides)]
         return out
 
     last = curves(len(keep) - 1)

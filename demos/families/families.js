@@ -4,19 +4,19 @@
 // file is written by the script of the same name in data/.
 //
 // a drawing is run over and over while its slide is shown, from its start each time the slide is
-// shown. it is drawn complete in the print view, under ?still, and under reduced motion. the lines
-// are colored from a colormap of matplotlib, as in the figures of DyLAN. in each mode, the end of
-// the colormap that is close to the ground of the slide is moved toward the other end until its
-// color has a contrast of 3:1 against the ground, as the theme does for a backdrop of a file.
+// shown. it is drawn complete in the print view, under ?still, and under reduced motion. the colors
+// are taken from a colormap of matplotlib, as in the figures of DyLAN. on a dark ground, the dark end
+// of a colormap is moved toward the other end until its color has a contrast of 3:1 against the ground.
 //
 // section: the section q3 = 0 of the center manifold of the Earth-Moon L2 (Fig. 6 of Jorba and
-// Masdemont 1999). the energy h rises from 0.2 to 1.0, the invariant curves are deformed with it, and
-// each curve is colored by its rotation number in plasma. the halo orbits are born at the boundary.
+// Masdemont 1999). the energy h rises from 0.2 to 1.0. each orbit is drawn as the dots of its
+// crossings, colored by its rotation number in plasma, and the dots are carried around the curve of
+// the orbit while its rotation number changes. the halo orbits are born at the boundary.
 //
 // tori: the unstable 2-tori near L5 in the bicircular problem (Figs. 8 and 9 of Simó et al. 1995), in
-// the plane of the primaries. one orbit is wound on a torus, the torus is grown out of the periodic
-// orbit with the vertical amplitude alpha, and each of the ten computed tori is left behind in its
-// color of magma, the smaller ones over the larger ones.
+// the plane of the primaries. on each of the ten computed tori, orbits that start on its invariant
+// curve are wound along it, first on the smallest torus and then on each larger one in turn. the tori
+// are colored by the vertical amplitude alpha in magma, the smaller ones over the larger ones.
 //
 // normal-form: the orbits near a saddle, drawn in standard coordinates and carried into the
 // coordinates of the normal form and back.
@@ -75,16 +75,19 @@
     const bg = tone('--bg', '#050505');
     const ground = /^#[0-9a-f]{6}$/i.test(bg) ? rgb(bg.slice(1)) : [5, 5, 5];
     const range = Object.fromEntries(Object.keys(STOPS).map((name) => [name, ends(name, ground)]));
+    const dark = luminance(ground) < 0.2;
     return {
+      dark,
       text: tone('--text', '#f2f2ef'),
       violet: tone('--violet', '#c94fe6'),
       accent: tone('--accent', '#f08050'),
       vermilion: tone('--data-6', '#d55e00'),
       purple: tone('--data-7', '#cc79a7'),
       ground: bg,
-      // the color of a colormap at v, from 0 at its lower end to 1 at its upper end
-      map(name, v, alpha = 1) {
-        const [lo, hi] = range[name];
+      // the color of a colormap at v, from 0 at its lower end to 1 at its upper end. with whole, the
+      // colormap is not cut short on a light ground, as in a figure of DyLAN on white
+      map(name, v, alpha = 1, whole = false) {
+        const [lo, hi] = whole && !dark ? [0, 1] : range[name];
         const [r, g, b] = sample(name, lo + (hi - lo) * clamp(v));
         return `rgba(${Math.round(r)}, ${Math.round(g)}, ${Math.round(b)}, ${alpha})`;
       },
@@ -117,23 +120,43 @@
   const KINDS = {};
 
   // ---- section -------------------------------------------------------------------------------------------
-  // the seconds of the rise of the energy, of the rest at the last energy, and of the fade at each end
-  const SECTION = { rise: 13, rest: 3, fade: 0.7 };
+  // the seconds of the rise of the energy, of the rest at the last energy, and of the fade at each end.
+  // an orbit is drawn as dots of radius dot, about spacing apart at the last energy. where the rotation
+  // number of an orbit changes fast, the orbit has fewer dots, so that no dot moves faster than speed
+  // per second
+  const SECTION = { rise: 13, rest: 3, fade: 0.7, spacing: 6.5, speed: 330, dot: 1.15 };
   KINDS.section = {
     seconds: SECTION.rise + SECTION.rest + SECTION.fade,
     prepare(data) {
       const points = decode(data.points);
-      const perFrame = points.length / data.energies.length;
+      const frames = data.energies.length;
+      const perFrame = points.length / frames;
       const offsets = [];
       let at = 2 * data.boundary;
       for (const n of data.counts) { offsets.push(at); at += 2 * n; }
       let [x0, x1, y0, y1] = [0, 0, 0, 0];
-      const last = (data.energies.length - 1) * perFrame;
+      const last = (frames - 1) * perFrame;
       for (let i = 0; i < data.boundary; i++) {
         x0 = Math.min(x0, points[last + 2 * i]); x1 = Math.max(x1, points[last + 2 * i]);
         y0 = Math.min(y0, points[last + 2 * i + 1]); y1 = Math.max(y1, points[last + 2 * i + 1]);
       }
-      return { points, perFrame, offsets, window: [x0, x1, y0, y1], now: new Float32Array(perFrame) };
+      // the length of each curve at the last energy, and the mean change of its rotation number per second
+      const lengths = data.counts.map((n, c) => {
+        const o = last + offsets[c];
+        let sum = 0;
+        for (let i = 0; i < n; i++) {
+          const k = (i + 1) % n;
+          sum += Math.hypot(points[o + 2 * k] - points[o + 2 * i], points[o + 2 * k + 1] - points[o + 2 * i + 1]);
+        }
+        return sum;
+      });
+      const rates = data.counts.map((n, c) => {
+        const first = c < data.central ? 0 : Math.max(0, data.born - 1);
+        let sum = 0;
+        for (let f = first; f < frames - 1; f++) sum += Math.abs(data.rotation[f + 1][c] - data.rotation[f][c]);
+        return sum / ((SECTION.rise * (frames - 1 - first)) / (frames - 1));
+      });
+      return { points, perFrame, offsets, lengths, rates, window: [x0, x1, y0, y1], now: new Float32Array(perFrame), key: '' };
     },
     draw(d, t) {
       const { g, data, state, colors } = d;
@@ -154,33 +177,55 @@
       d.canvas.style.opacity = done ? 1 : Math.min(smooth(t / SECTION.fade), smooth((this.seconds - t) / SECTION.fade));
 
       const v = view(d, state.window, 14);
+      if (state.key !== `${d.w}x${d.h}`) {
+        state.key = `${d.w}x${d.h}`;
+        // half the number of dots of each orbit
+        state.half = state.lengths.map((length, c) => {
+          const px = length * v.s;
+          return Math.max(4, Math.round(Math.min(px / SECTION.spacing, (2 * SECTION.speed) / (state.rates[c] * px)) / 2));
+        });
+      }
       g.lineJoin = 'round';
       closed(g, p, 0, data.boundary, v);
       g.globalAlpha = 0.055;
       g.fillStyle = colors.text;
       g.fill();
+      g.globalAlpha = 0.3;
+      g.strokeStyle = colors.text;
+      g.lineWidth = 1;
+      g.stroke();
+      // the dots of an orbit are its crossings j returns before and after its first point. on its curve,
+      // the crossing j is j times the rotation number of a turn away from the first point, measured in
+      // the length of the curve, so the dots are carried around the curve while the energy rises
       const [lo, hi] = data.range;
       const rotation = at(data.rotation);
-      g.lineWidth = 1.3;
+      const r = SECTION.dot;
       data.counts.forEach((n, c) => {
         const island = c >= data.central;
         if (island && !born) return;
+        const o = state.offsets[c];
         g.globalAlpha = island ? born : 1;
-        g.strokeStyle = colors.map('plasma', (rotation[c] - lo) / (hi - lo));
-        closed(g, p, state.offsets[c], n, v);
-        g.stroke();
+        g.fillStyle = colors.map('plasma', (rotation[c] - lo) / (hi - lo), 1, true);
+        g.beginPath();
+        for (let j = -state.half[c]; j < state.half[c]; j++) {
+          const turn = j * rotation[c];
+          const along = (turn - Math.floor(turn)) * n;
+          const i = Math.floor(along) % n;
+          const k = (i + 1) % n;
+          const part = along - Math.floor(along);
+          const x = v.x + v.s * (p[o + 2 * i] + (p[o + 2 * k] - p[o + 2 * i]) * part);
+          const y = v.y - v.s * (p[o + 2 * i + 1] + (p[o + 2 * k + 1] - p[o + 2 * i + 1]) * part);
+          g.moveTo(x + r, y);
+          g.arc(x, y, r, 0, TAU);
+        }
+        g.fill();
       });
-      g.globalAlpha = 0.9;
-      g.strokeStyle = colors.text;
-      g.lineWidth = 2;
-      closed(g, p, 0, data.boundary, v);
-      g.stroke();
       // the vertical Lyapunov orbit as a disk and the halo orbits as diamonds, as in the figure of DyLAN
       const mark = (x, y, color, diamond) => {
-        const [cx, cy, r] = [v.x + v.s * x, v.y - v.s * y, 5.5];
+        const [cx, cy, size] = [v.x + v.s * x, v.y - v.s * y, 5.5];
         g.beginPath();
-        if (diamond) { g.moveTo(cx, cy - r * 1.25); g.lineTo(cx + r * 1.25, cy); g.lineTo(cx, cy + r * 1.25); g.lineTo(cx - r * 1.25, cy); g.closePath(); }
-        else g.arc(cx, cy, r, 0, TAU);
+        if (diamond) { g.moveTo(cx, cy - size * 1.25); g.lineTo(cx + size * 1.25, cy); g.lineTo(cx, cy + size * 1.25); g.lineTo(cx - size * 1.25, cy); g.closePath(); }
+        else g.arc(cx, cy, size, 0, TAU);
         g.fillStyle = color;
         g.fill();
         g.lineWidth = 1.5;
@@ -196,129 +241,148 @@
   };
 
   // ---- tori ----------------------------------------------------------------------------------------------
-  // the seconds of the trace of the periodic orbit, of the growth of the torus, of the rest, and of the fade.
-  // an orbit is wound over turns periods of the Sun on the torus that is grown, with steps points per
-  // period. on the n-th torus that is left behind, it is wound over kept + n more periods
-  const TORI = { orbit: 1.2, grow: 12, rest: 4, fade: 0.8, turns: 110, kept: 150, more: 22, steps: 48, harmonics: 5 };
+  // the seconds of the trace of the periodic orbit, of the time between the starts of the first and the
+  // last torus, of the winding of one torus, of the rest, and of the fade. on a torus, streams orbits
+  // start at the same phase of the Sun and at even steps of the vertical phase, and each is wound over
+  // loops periods of the Sun, and over more periods on each larger torus, with steps points per period
+  const TORI = { orbit: 1.2, spread: 9.9, wind: 2.2, rest: 4, fade: 0.8, streams: 96, heads: 4, loops: 1.8, more: 0.23, steps: 48, harmonics: 5 };
   KINDS.tori = {
-    seconds: TORI.orbit + TORI.grow + TORI.rest + TORI.fade,
+    seconds: TORI.orbit + TORI.spread + TORI.wind + TORI.rest + TORI.fade,
     prepare(data) {
-      const J = TORI.harmonics;
-      // the coefficients of a torus as a table over k from 0 and j from -J, four numbers per harmonic
-      const table = (modes) => {
+      const { harmonics: J, steps: M, streams: R } = TORI;
+      const tori = data.tori.map((torus, n) => {
+        // the coefficients as a table over k from 0 and j from -J, four numbers per harmonic
         const c = new Float64Array((J + 1) * (2 * J + 1) * 4);
-        for (const [j, k, ...values] of modes) c.set(values, (k * (2 * J + 1) + j + J) * 4);
-        return c;
-      };
-      const tori = data.tori.map((torus) => ({ alpha: torus.alpha, rotation: torus.rotation, c: table(torus.modes) }));
-      // the torus of amplitude zero is the periodic orbit, i.e. the mean of the smallest torus over the vertical phase
-      const first = tori[0];
-      const zero = { alpha: 0, rotation: first.rotation, c: first.c.map((value, i) => (i < (2 * J + 1) * 4 ? value : 0)) };
-      const state = { tori: [zero, ...tori], mixed: new Float64Array(first.c.length), ghost: document.createElement('canvas'), kept: -1 };
-      const path = this.wind(state, state.tori.length - 1, 0, TORI.turns);
+        for (const [j, k, ...values] of torus.modes) c.set(values, (k * (2 * J + 1) + j + J) * 4);
+        // the sums over the harmonics of the phase of the Sun, at each of its M phases
+        const sums = new Float64Array((J + 1) * M * 4);
+        for (let k = 0; k <= J; k++) {
+          for (let m = 0; m < M; m++) {
+            let [xr, xi, yr, yi] = [0, 0, 0, 0];
+            for (let j = -J; j <= J; j++) {
+              const o = (k * (2 * J + 1) + j + J) * 4;
+              const angle = (TAU * j * m) / M;
+              const [cos, sin] = [Math.cos(angle), Math.sin(angle)];
+              xr += c[o] * cos - c[o + 1] * sin; xi += c[o] * sin + c[o + 1] * cos;
+              yr += c[o + 2] * cos - c[o + 3] * sin; yi += c[o + 2] * sin + c[o + 3] * cos;
+            }
+            sums.set([xr, xi, yr, yi], (k * M + m) * 4);
+          }
+        }
+        return { alpha: torus.alpha, rotation: torus.rotation, sums, full: Math.round((TORI.loops + TORI.more * n) * M), drawn: 0 };
+      });
+      const canvas = () => document.createElement('canvas');
+      const state = { tori, top: canvas(), under: canvas(), base: 0, time: -1, at: new Float64Array(2) };
       let [x0, x1, y0, y1] = [Infinity, -Infinity, Infinity, -Infinity];
-      for (let i = 0; i < path.length; i += 2) {
-        x0 = Math.min(x0, path[i]); x1 = Math.max(x1, path[i]); y0 = Math.min(y0, path[i + 1]); y1 = Math.max(y1, path[i + 1]);
+      for (let r = 0; r < R; r++) {
+        for (let n = 0; n < M; n++) {
+          const [x, y] = this.spot(state, tori[tori.length - 1], n, r);
+          x0 = Math.min(x0, x); x1 = Math.max(x1, x); y0 = Math.min(y0, y); y1 = Math.max(y1, y);
+        }
       }
       state.window = [x0, x1, y0, y1];
       return state;
     },
-    // the points of an orbit wound on the torus between the tori i and i + 1, at the fraction w
-    wind(state, i, w, turns) {
-      const { harmonics: J, steps: M } = TORI;
-      const [a, b] = [state.tori[i], state.tori[Math.min(i + 1, state.tori.length - 1)]];
-      const c = state.mixed;
-      for (let n = 0; n < c.length; n++) c[n] = a.c[n] + (b.c[n] - a.c[n]) * w;
-      const rotation = a.rotation + (b.rotation - a.rotation) * w;
-      // the sums over the harmonics of the phase of the Sun, at each of its M phases
-      const sums = new Float64Array((J + 1) * M * 4);
-      for (let k = 0; k <= J; k++) {
-        for (let m = 0; m < M; m++) {
-          let [xr, xi, yr, yi] = [0, 0, 0, 0];
-          for (let j = -J; j <= J; j++) {
-            const o = (k * (2 * J + 1) + j + J) * 4;
-            const angle = (TAU * j * m) / M;
-            const [cos, sin] = [Math.cos(angle), Math.sin(angle)];
-            xr += c[o] * cos - c[o + 1] * sin; xi += c[o] * sin + c[o + 1] * cos;
-            yr += c[o + 2] * cos - c[o + 3] * sin; yi += c[o + 2] * sin + c[o + 3] * cos;
-          }
-          sums.set([xr, xi, yr, yi], (k * M + m) * 4);
-        }
+    // the point of the orbit r of a torus after n steps. in the plane of the primaries a torus is
+    // covered twice by its vertical phase, so the orbits start within half a turn of it
+    spot(state, torus, n, r) {
+      const { harmonics: J, steps: M, streams: R } = TORI;
+      const m = n % M;
+      const phase = (Math.PI * r) / R + ((TAU + torus.rotation) * n) / M;
+      const s = torus.sums;
+      let [x, y] = [s[m * 4], s[m * 4 + 2]];
+      for (let k = 1; k <= J; k++) {
+        const o = (k * M + m) * 4;
+        const [cos, sin] = [Math.cos(k * phase), Math.sin(k * phase)];
+        x += 2 * (s[o] * cos - s[o + 1] * sin);
+        y += 2 * (s[o + 2] * cos - s[o + 3] * sin);
       }
-      const count = turns * M + 1;
-      const path = new Float32Array(2 * count);
-      for (let n = 0; n < count; n++) {
-        const m = n % M;
-        const phase = ((TAU + rotation) * n) / M;
-        let [x, y] = [sums[m * 4], sums[m * 4 + 2]];
-        for (let k = 1; k <= J; k++) {
-          const o = (k * M + m) * 4;
-          const [cos, sin] = [Math.cos(k * phase), Math.sin(k * phase)];
-          x += 2 * (sums[o] * cos - sums[o + 1] * sin);
-          y += 2 * (sums[o + 2] * cos - sums[o + 3] * sin);
-        }
-        path[2 * n] = x;
-        path[2 * n + 1] = y;
-      }
-      return path;
+      state.at[0] = x;
+      state.at[1] = y;
+      return state.at;
     },
-    // each period of the Sun is drawn as a line of its own, so that the lines add up where the orbit is dense
-    stroke(g, path, v) {
-      const last = path.length / 2 - 1;
-      for (let from = 0; from < last; from += TORI.steps) {
-        g.beginPath();
-        for (let n = from; n <= Math.min(last, from + TORI.steps); n++) {
-          g[n > from ? 'lineTo' : 'moveTo'](v.x + v.s * path[2 * n], v.y - v.s * path[2 * n + 1]);
+    // the orbits of a torus from the step from to the step to. each period of the Sun of each orbit is
+    // drawn as a line of its own, so that the lines add up where the orbits are dense
+    trail(k, v, state, torus, from, to) {
+      for (let r = 0; r < TORI.streams; r++) {
+        for (let a = from; a < to; ) {
+          const b = Math.min(to, (Math.floor(a / TORI.steps) + 1) * TORI.steps);
+          k.beginPath();
+          for (let n = a; n <= b; n++) {
+            const [x, y] = this.spot(state, torus, n, r);
+            k[n > a ? 'lineTo' : 'moveTo'](v.x + v.s * x, v.y - v.s * y);
+          }
+          k.stroke();
+          a = b;
         }
-        g.stroke();
       }
     },
     draw(d, t) {
       const { g, data, state, colors } = d;
+      const { tori, top, under } = state;
       const done = !Number.isFinite(t);
-      const last = state.tori.length - 1;
-      const grown = done ? 1 : clamp((t - TORI.orbit) / TORI.grow);
-      const at = last * (grown * grown * (3 - 2 * grown) * 0.4 + grown * 0.6);
-      const i = Math.min(last - 1, Math.floor(at));
+      const last = tori.length - 1;
+      const gap = TORI.spread / last;
+      const wind = Math.min(TORI.wind, 2 * gap);
+      // the part of the winding of the torus n that is done, and its steps
+      const part = (n) => (done ? 1 : clamp((t - TORI.orbit - n * gap) / wind));
+      const steps = (n) => Math.round(tori[n].full * part(n));
       const v = view(d, state.window, 16);
-      const [lo, hi] = [state.tori[1].alpha, state.tori[last].alpha];
-      const color = (alpha, opacity) => colors.map('magma', (alpha - lo) / (hi - lo), opacity);
+      const [lo, hi] = [tori[0].alpha, tori[last].alpha];
+      // on a dark ground the colormap is turned around, so that the largest torus is the closest to the ground in both modes
+      const color = (alpha, opacity) => {
+        const value = (alpha - lo) / (hi - lo);
+        return colors.map('magma', colors.dark ? 1 - value : value, opacity, true);
+      };
       d.canvas.style.opacity = done ? 1 : smooth((this.seconds - t) / TORI.fade);
 
-      // the tori left behind are kept on a canvas of their own, each drawn under those before it
-      const ghost = state.ghost;
-      if (d.changed || ghost.width !== d.canvas.width || ghost.height !== d.canvas.height || state.kept > Math.floor(at + 1e-9)) {
-        ghost.width = d.canvas.width;
-        ghost.height = d.canvas.height;
-        state.kept = 0;
+      // the lines are kept on two canvases. a line is drawn under the lines before it, so the smaller tori
+      // are over the larger ones. at most two tori are wound at a time: the smaller on the canvas top, with
+      // the finished ones, and the larger on the canvas under, which is put under top when the smaller is done
+      if (d.changed || top.width !== d.canvas.width || top.height !== d.canvas.height || t < state.time) {
+        for (const canvas of [top, under]) { canvas.width = d.canvas.width; canvas.height = d.canvas.height; }
+        for (const torus of tori) torus.drawn = 0;
+        state.base = 0;
       }
-      const k = ghost.getContext('2d');
-      for (; state.kept < Math.floor(at + 1e-9); ) {
-        state.kept += 1;
+      state.time = t;
+      const pen = (canvas, torus) => {
+        const k = canvas.getContext('2d');
         k.setTransform(d.k, 0, 0, d.k, 0, 0);
         k.globalCompositeOperation = 'destination-over';
         k.lineWidth = 0.8;
         k.lineJoin = 'round';
-        k.strokeStyle = color(state.tori[state.kept].alpha, 0.6);
-        this.stroke(k, this.wind(state, state.kept, 0, TORI.kept + TORI.more * state.kept), v);
-      }
-      g.lineJoin = 'round';
-      if (at < last && at > 0) {
-        const w = at - i;
-        const alpha = state.tori[i].alpha + (state.tori[i + 1].alpha - state.tori[i].alpha) * w;
-        g.lineWidth = 0.8;
-        g.strokeStyle = color(alpha, 0.6);
-        this.stroke(g, this.wind(state, i, w, TORI.turns), v);
+        k.strokeStyle = color(torus.alpha, 0.6);
+        return k;
+      };
+      const wound = (canvas, n) => {
+        const to = steps(n);
+        if (to > tori[n].drawn) this.trail(pen(canvas, tori[n]), v, state, tori[n], tori[n].drawn, to);
+        tori[n].drawn = to;
+      };
+      while (state.base <= last) {
+        wound(top, state.base);
+        if (tori[state.base].drawn < tori[state.base].full) {
+          if (state.base < last) wound(under, state.base + 1);
+          break;
+        }
+        const k = top.getContext('2d');
+        k.setTransform(1, 0, 0, 1, 0, 0);
+        k.globalCompositeOperation = 'destination-over';
+        k.drawImage(under, 0, 0);
+        under.width = d.canvas.width;
+        state.base += 1;
       }
       g.save();
       g.setTransform(1, 0, 0, 1, 0, 0);
-      g.drawImage(ghost, 0, 0);
+      g.drawImage(under, 0, 0);
+      g.drawImage(top, 0, 0);
       g.restore();
       // the periodic orbit, traced first, and the point L5 as a cross
       const orbit = data.orbit;
       const traced = done ? 1 : smooth(t / TORI.orbit);
       g.strokeStyle = colors.text;
       g.lineWidth = 1.6;
+      g.lineJoin = 'round';
       g.beginPath();
       const shown = Math.round(traced * orbit.length);
       for (let n = 0; n <= shown; n++) {
@@ -330,6 +394,28 @@
       g.beginPath();
       for (const s of [1, -1]) { g.moveTo(v.x - 7, v.y - 7 * s); g.lineTo(v.x + 7, v.y + 7 * s); }
       g.stroke();
+      // the head of every fourth orbit that is being wound, as a dot with an edge in the color of the ground
+      g.fillStyle = colors.text;
+      g.strokeStyle = colors.ground;
+      g.lineWidth = 1;
+      tori.forEach((torus, n) => {
+        const u = part(n);
+        if (u <= 0 || u >= 1) return;
+        g.globalAlpha = 0.85 * Math.min(1, 8 * u, 5 * (1 - u));
+        const at = torus.full * u;
+        const from = Math.floor(at);
+        g.beginPath();
+        for (let r = 0; r < TORI.streams; r += TORI.heads) {
+          const [ax, ay] = this.spot(state, torus, from, r);
+          const [bx, by] = this.spot(state, torus, from + 1, r);
+          const x = v.x + v.s * (ax + (bx - ax) * (at - from));
+          const y = v.y - v.s * (ay + (by - ay) * (at - from));
+          g.moveTo(x + 2, y);
+          g.arc(x, y, 2, 0, TAU);
+        }
+        g.fill();
+        g.stroke();
+      });
       g.globalAlpha = 1;
     },
   };
@@ -338,11 +424,16 @@
   // the seconds of the trace of the orbits, of the wait in standard coordinates, of the change of
   // coordinates, and of the rest in the coordinates of the normal form. there are levels orbits in each
   // of the four sectors of the saddle, of points points each, and the change is drawn from frames stages
-  const NORMAL = { trace: 3.4, wait: 1.4, morph: 4.5, rest: 3.5, levels: 16, points: 96, frames: 8, reach: 1.3, grid: 0.2 };
+  const NORMAL = { trace: 3.4, wait: 1.4, morph: 4.5, rest: 3.5, levels: 16, points: 96, frames: 8, reach: 1.3, grid: 0.2, glow: [[24, 0.06], [13, 0.11], [6.5, 0.2]] };
   // the generating function of the change of coordinates, a sum of c x^a y^b written as [c, a, b]. it is
   // chosen for the look and is not the one of a model. the change is its flow over the time 1, a
   // canonical change close to the identity, as in the Lie series method
-  const GENERATOR = [[0.16, 3, 0], [-0.13, 1, 2], [0.09, 2, 1], [0.06, 0, 3], [0.06, 4, 0], [-0.08, 2, 2]];
+  const GENERATOR = [
+    [0.2, 3, 0], [-0.17, 1, 2], [0.13, 2, 1], [0.09, 0, 3],
+    [0.1, 4, 0], [-0.14, 2, 2], [0.07, 1, 3], [-0.06, 0, 4],
+    [-0.04, 5, 0], [0.1, 3, 2], [0.06, 2, 3], [-0.07, 1, 4],
+    [0.02, 6, 0], [-0.07, 4, 2], [0.06, 2, 4],
+  ];
   KINDS['normal-form'] = {
     computed: true,
     prepare: () => ({ key: '' }),
@@ -456,10 +547,18 @@
         g.moveTo(X(0), Y(0));
         for (let i = 1; i < n - 1; i++) g.quadraticCurveTo(X(i), Y(i), (X(i) + X(i + 1)) / 2, (Y(i) + Y(i + 1)) / 2);
         g.lineTo(X(n - 1), Y(n - 1));
-        g.globalAlpha = line.kind === 'grid' ? 0.2 * smooth(traced * 3) : 1;
-        g.lineWidth = line.kind === 'orbit' ? 1.4 : line.kind === 'grid' ? 1 : 2.8;
         g.strokeStyle = line.kind === 'orbit' ? colors.map('viridis', 1 - line.level) : line.kind === 'grid' ? colors.text
           : line.kind === 'stable' ? colors.violet : colors.accent;
+        // the two manifolds glow: each is drawn wide and faint under its line
+        if (line.kind === 'stable' || line.kind === 'unstable') {
+          for (const [width, alpha] of NORMAL.glow) {
+            g.globalAlpha = alpha;
+            g.lineWidth = width;
+            g.stroke();
+          }
+        }
+        g.globalAlpha = line.kind === 'grid' ? 0.2 * smooth(traced * 3) : 1;
+        g.lineWidth = line.kind === 'orbit' ? 1.4 : line.kind === 'grid' ? 1 : 2.8;
         g.stroke();
       }
       // the drawing is faded toward the sides of its box
