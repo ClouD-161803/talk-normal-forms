@@ -234,8 +234,9 @@
   // last torus, of the run of all tori, and of the fade. on the smallest torus, streams orbits start at
   // the same phase of the Sun and at even steps of the vertical phase, and each larger torus has more
   // orbits more. an orbit is drawn as a train of dots of radius dot, spacing apart and length periods of
-  // the Sun long, that runs along the torus at speed periods per second, with steps points per period
-  const TORI = { orbit: 1.2, spread: 9.9, run: 12, fade: 0.8, streams: 12, more: 1, length: 0.32, spacing: 5, speed: 0.27, dot: 1.6, steps: 96, harmonics: 5 };
+  // the Sun long, that runs along the torus at speed periods per second, with steps points per period. the
+  // periodic orbit and the cross at L5 are drawn at the opacity faint
+  const TORI = { orbit: 1.2, spread: 9.9, run: 12, fade: 0.8, streams: 12, more: 1, length: 0.55, spacing: 5, speed: 0.27, dot: 1.6, faint: 0.5, steps: 96, harmonics: 5 };
   KINDS.tori = {
     seconds: TORI.orbit + TORI.spread + TORI.run + TORI.fade,
     prepare(data) {
@@ -348,8 +349,9 @@
       const orbit = data.orbit;
       const traced = smooth(t / TORI.orbit);
       g.strokeStyle = colors.text;
-      g.lineWidth = 1.6;
+      g.lineWidth = 1.2;
       g.lineJoin = 'round';
+      g.globalAlpha = TORI.faint;
       g.beginPath();
       const shown = Math.round(traced * orbit.length);
       for (let n = 0; n <= shown; n++) {
@@ -357,9 +359,9 @@
         g[n ? 'lineTo' : 'moveTo'](v.x + v.s * x, v.y - v.s * y);
       }
       g.stroke();
-      g.globalAlpha = traced;
+      g.globalAlpha = TORI.faint * traced;
       g.beginPath();
-      for (const s of [1, -1]) { g.moveTo(v.x - 7, v.y - 7 * s); g.lineTo(v.x + 7, v.y + 7 * s); }
+      for (const s of [1, -1]) { g.moveTo(v.x - 4, v.y - 4 * s); g.lineTo(v.x + 4, v.y + 4 * s); }
       g.stroke();
       g.globalAlpha = 1;
     },
