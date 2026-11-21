@@ -44,7 +44,7 @@ html.reveal-print .reveal .slides section .z-overlay > .z-axis > .z-osc { animat
 .reveal .slides section.lin-stab > ul { margin: 0 0 18px; }
 .reveal .slides section.lin-stab > ul > li { margin-bottom: 6px; }
 .reveal .slides section.lin-stab > .math { font-size: 42px; margin: 8px 0 18px; }
-.reveal .slides section#cr3bp-dynamics > :is(.math, p, ol) { position: absolute; left: 0; top: 0; margin: 0; max-width: none; }
+.reveal .slides section#cr3bp-dynamics > :is(.math, p, ol, ul) { position: absolute; left: 0; top: 0; margin: 0; max-width: none; }
 .reveal .slides section#cr3bp-dynamics > .math { font-size: 40px; }
 .reveal .slides section#cr3bp-dynamics span[class*="k-"] { display: inline-block; }
 .reveal .slides section#cr3bp-dynamics .figure-box.cr3bp-frame { left: 480px; top: 60px; width: 960px; height: 960px; transform: translate(720px, -320px) scale(0.4133); }
@@ -73,6 +73,8 @@ html[data-theme="light"] { --yellow: #8f6a00; }
     font-size: 27px;
     line-height: 1.26;
     background: transparent;
+    border-top: 0;
+    border-bottom: 0;
   }
   .reveal .slides section.stab-slide table.stab-tbl th {
     padding: 4px 14px 8px 8px;
@@ -255,7 +257,7 @@ try {
 <section class="section" data-run="What a normal form is">
   <div class="sec">
     <h2>Some basics</h2>
-    <ul class="outline" data-auto></ul>
+    <ol class="outline" data-auto></ol>
   </div>
   <div class="figure-box family" data-family="normal-form"></div>
 </section>
@@ -666,7 +668,7 @@ For questions:
 <section class="section" data-run="Equilibrium point">
   <div class="sec">
     <h2>At an equilibrium point</h2>
-    <ul class="outline" data-auto></ul>
+    <ol class="outline" data-auto></ol>
   </div>
   <div class="backdrop" data-backdrop="poincare" data-system="sun-earth-l1"></div>
 </section>
@@ -732,7 +734,7 @@ For questions:
 <section class="section" data-run="Time-periodic model">
   <div class="sec">
     <h2>At a periodic orbit of a time-periodic model</h2>
-    <ul class="outline" data-auto></ul>
+    <ol class="outline" data-auto></ol>
   </div>
   <div class="backdrop" data-backdrop="tori" data-tori="0.18"></div>
 </section>
@@ -828,7 +830,7 @@ For questions:
 <section class="section" data-run="Autonomous model">
   <div class="sec">
     <h2>At a periodic orbit of an autonomous model</h2>
-    <ul class="outline" data-auto></ul>
+    <ol class="outline" data-auto></ol>
   </div>
   <div class="backdrop" data-backdrop="wideRibbon" data-cx="0.2" data-cy="0" data-half="1.3"></div>
 </section>
@@ -872,7 +874,7 @@ For questions:
 <section class="section" data-run="A Gaussian at an L1 Lyapunov orbit">
   <div class="sec">
     <h2>A Gaussian at an \(\mathcal{L}_{1}\) Lyapunov orbit</h2>
-    <ul class="outline" data-auto></ul>
+    <ol class="outline" data-auto></ol>
   </div>
   <div class="backdrop" data-backdrop="tubes" data-cx="0.42" data-cy="0" data-half="0.6"></div>
 </section>
