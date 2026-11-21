@@ -3,7 +3,8 @@
 // data of each drawing of the deck in a script of its own, e.g. demos/families/tori.js. the data
 // files are written by data/section.py and data/tori.py. a drawing fills the right of a section slide
 // and of a title or closing slide. on another slide, the classes lower-left and lower-right put it
-// in one of two boxes side by side in the lower half.
+// in one of two boxes side by side in the lower half, or in one of three with a drawing of the class
+// lower-middle between them.
 //
 // the version of a drawing is picked in its data-family-select, as terms key=value separated by
 // commas, e.g. data-family-select="view=xz,torus=0.18". the keys and values of a drawing are listed
@@ -97,7 +98,6 @@
       text: tone('--text', '#f2f2ef'),
       violet: tone('--violet', '#c94fe6'),
       accent: tone('--accent', '#f08050'),
-      vermilion: tone('--data-6', '#d55e00'),
       purple: tone('--data-7', '#cc79a7'),
       ground: bg,
       // the color of a colormap at v, from 0 at its lower end to 1 at its upper end. with whole, the
@@ -238,7 +238,7 @@
       };
       g.globalAlpha = born;
       const halos = at(data.halos);
-      if (born) for (const i of [0, 2]) mark(halos[i], halos[i + 1], colors.vermilion, true);
+      if (born) for (const i of [0, 2]) mark(halos[i], halos[i + 1], colors.purple, true);
       g.globalAlpha = 1;
       mark(...at(data.vertical), colors.purple, false);
     },
@@ -568,6 +568,9 @@
 .reveal .slides section:is(.title, .closing) .figure-box.family { left: 960px; top: 0; width: 960px; height: 1080px; }
 .reveal .slides section .figure-box.family.lower-left { left: 236px; top: 600px; width: 644px; height: 396px; }
 .reveal .slides section .figure-box.family.lower-right { left: 1037px; top: 600px; width: 644px; height: 396px; }
+.reveal .slides section .figure-box.family.lower-middle { left: 690px; top: 600px; width: 540px; height: 396px; }
+.reveal .slides section:has(.family.lower-middle) .figure-box.family.lower-left { left: 110px; width: 540px; }
+.reveal .slides section:has(.family.lower-middle) .figure-box.family.lower-right { left: 1270px; width: 540px; }
 #family-picks { position: fixed; left: 50%; top: 8px; translate: -50% 0; z-index: 99; max-width: calc(100vw - 32px); box-sizing: border-box; padding: 8px 12px; border: 1px solid color-mix(in srgb, var(--text) 30%, transparent); border-radius: 8px; background: var(--bg); color: var(--text); font: 14px/1.4 system-ui, sans-serif; }
 #family-picks:empty { display: none; }
 #family-picks > div { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; }
