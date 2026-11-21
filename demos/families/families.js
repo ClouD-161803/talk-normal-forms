@@ -12,8 +12,9 @@
 // in the bar is drawn at once, and the bar shows the tag to write into the deck, since the bar does
 // not write it. a data file that the deck does not load is loaded when a drawing needs it.
 //
-// a drawing is run over and over while its slide is shown, from its start each time the slide is
-// shown. it is drawn complete in the print view, under ?still, and under reduced motion. the colors
+// a drawing is run from its start each time its slide is shown. the section is run once and then
+// stays, the tori run on without end, and the normal-form drawing is run over and over. a drawing is
+// drawn complete in the print view, under ?still, and under reduced motion. the colors
 // are taken from a colormap of matplotlib, as in the figures of DyLAN. on a dark ground, the dark end
 // of a colormap is moved toward the other end until its color has a contrast of 3:1 against the ground,
 // or of 1.6:1 where the colormap is used whole.
@@ -101,9 +102,11 @@
       ground: bg,
       // the color of a colormap at v, from 0 at its lower end to 1 at its upper end. with whole, the
       // colormap is not cut short on a light ground, as in a figure of DyLAN on white, and on a dark
-      // ground it loses only the colors that are lost in the ground
-      map(name, v, alpha = 1, whole = false) {
-        const [lo, hi] = !whole ? range[name] : dark ? wide[name] : [0, 1];
+      // ground it loses only the colors that are lost in the ground. with trim, the colormap is used
+      // between two of its values only
+      map(name, v, alpha = 1, whole = false, trim = [0, 1]) {
+        const ends = !whole ? range[name] : dark ? wide[name] : [0, 1];
+        const [lo, hi] = [Math.max(ends[0], trim[0]), Math.min(ends[1], trim[1])];
         const [r, g, b] = sample(name, lo + (hi - lo) * clamp(v));
         return `rgba(${Math.round(r)}, ${Math.round(g)}, ${Math.round(b)}, ${alpha})`;
       },
@@ -126,13 +129,13 @@
   const KINDS = {};
 
   // ---- section -------------------------------------------------------------------------------------------
-  // the seconds of the rise of the energy, of the rest at the last energy, and of the fade at each end.
+  // the seconds of the rise of the energy, after which the drawing stays, and of the fade at its start.
   // an orbit is drawn as dots of radius dot, about spacing apart at the last energy. where the rotation
   // number of an orbit changes fast, the orbit has fewer dots, so that no dot moves faster than speed
-  // per second
-  const SECTION = { rise: 13, rest: 3, fade: 0.7, spacing: 7, speed: 330, dot: 1.4 };
+  // per second, but never fewer than close its curve
+  const SECTION = { rise: 13, fade: 0.7, spacing: 7, speed: 330, dot: 1.4 };
   KINDS.section = {
-    seconds: SECTION.rise + SECTION.rest + SECTION.fade,
+    ends: SECTION.rise,
     picks: { system: [['earth-moon-l2', 'Earth-Moon L2'], ['sun-earth-l1', 'Sun-Earth L1']] },
     source: (select) => `section-${select.system ?? 'earth-moon-l2'}`,
     prepare(data) {
@@ -182,7 +185,7 @@
       const at = (rows) => rows[f].map((value, i) => value + (rows[f + 1][i] - value) * w);
       // the curves about the halo orbits are faded in between the last energy without them and the first with them
       const born = f + 1 < data.born ? 0 : f + 1 === data.born ? w : 1;
-      d.canvas.style.opacity = done ? 1 : Math.min(smooth(t / SECTION.fade), smooth((this.seconds - t) / SECTION.fade));
+      d.canvas.style.opacity = done ? 1 : smooth(t / SECTION.fade);
 
       const v = view(d, state.window, 14);
       if (state.key !== `${d.w}x${d.h}`) {
@@ -206,7 +209,9 @@
         g.globalAlpha = island ? born : 1;
         g.fillStyle = colors.map('plasma', (rotation[c] - lo) / (hi - lo), 1, true);
         g.beginPath();
-        for (let j = -state.half[c]; j < state.half[c]; j++) {
+        // an orbit with a small rotation number is given the dots with which it closes its curve
+        const half = Math.max(state.half[c], Math.ceil(0.5 / rotation[c]) + 1);
+        for (let j = -half; j < half; j++) {
           const turn = j * rotation[c];
           const along = (turn - Math.floor(turn)) * n;
           const i = Math.floor(along) % n;
@@ -219,7 +224,7 @@
         }
         g.fill();
       });
-      // the vertical Lyapunov orbit as a disk and the halo orbits as diamonds, as in the figure of DyLAN
+      // the vertical Lyapunov orbit as a disk and the halo orbits as diamonds
       const mark = (x, y, color, diamond) => {
         const [cx, cy, size] = [v.x + v.s * x, v.y - v.s * y, 5.5];
         g.beginPath();
@@ -233,22 +238,24 @@
       };
       g.globalAlpha = born;
       const halos = at(data.halos);
-      if (born) for (const i of [0, 2]) mark(halos[i], halos[i + 1], colors.purple, true);
+      if (born) for (const i of [0, 2]) mark(halos[i], halos[i + 1], colors.vermilion, true);
       g.globalAlpha = 1;
-      mark(...at(data.vertical), colors.vermilion, false);
+      mark(...at(data.vertical), colors.purple, false);
     },
   };
 
   // ---- tori ----------------------------------------------------------------------------------------------
   // the seconds of the trace of the periodic orbit, of the time between the starts of the first and the
-  // last torus, of the run of all tori, and of the fade. on the smallest torus, streams orbits start at
+  // last torus, and of the run of all tori before the moment of the complete drawing. the tori run on
+  // without end. on the smallest torus, streams orbits start at
   // the same phase of the Sun and at even steps of the vertical phase, and each larger torus has more
   // orbits more. an orbit is drawn as a train of dots of radius dot, spacing apart and length periods of
   // the Sun long, that runs along the torus at speed periods per second, with steps points per period.
   // the periodic orbit and the cross at L5 are drawn at the opacity faint. a torus drawn alone has
-// alone times the orbits and the length of a train, and the color of its alpha in both modes. in the
-// view along the y axis, x is drawn wide times larger than z, as in the figure of DyLAN
-  const TORI = { orbit: 1.2, spread: 9.9, run: 12, fade: 0.8, streams: 12, more: 1, length: 0.55, spacing: 5, speed: 0.27, dot: 1.6, faint: 0.5, alone: 2, wide: 5.5, steps: 96, harmonics: 5 };
+  // alone times the orbits and the length of a train, and the color of its alpha in both modes. in the
+  // view along the y axis, x is drawn wide times larger than z. the tori are colored between the
+  // values magma of the colormap. both are as in the figure of DyLAN
+  const TORI = { orbit: 1.2, spread: 9.9, run: 12, streams: 12, more: 1, length: 0.44, spacing: 5, speed: 0.27, dot: 1.6, faint: 0.5, alone: 2, wide: 5.5, magma: [0.18, 0.88], steps: 96, harmonics: 5 };
   KINDS.tori = {
     picks: {
       view: [['xy', 'x, y'], ['xz', 'x, z']],
@@ -286,7 +293,7 @@
       const spread = shown.length > 1 ? TORI.spread : 0;
       // in the plane of the primaries a torus is covered twice by its vertical phase, so the orbits
       // start within half a turn of it
-      const state = { tori, shown, spread, turns: up === 1 ? Math.PI : TAU, seconds: TORI.orbit + spread + TORI.run + TORI.fade, at: new Float64Array(2) };
+      const state = { tori, shown, spread, turns: up === 1 ? Math.PI : TAU, at: new Float64Array(2) };
       // the periodic orbit is in the plane of the primaries
       state.orbit = data.orbit.map(([x, y]) => [wide * x, up === 1 ? y : 0]);
       let [x0, x1, y0, y1] = [0, 0, 0, 0];
@@ -319,15 +326,13 @@
     draw(d, t) {
       const { g, data, state, colors } = d;
       const { tori, shown } = state;
-      // the complete drawing is the last frame before the fade, with every torus running
-      const done = !Number.isFinite(t);
-      if (done) t = state.seconds - TORI.fade;
+      // the complete drawing is a moment at which every torus is running
+      if (!Number.isFinite(t)) t = TORI.orbit + state.spread + TORI.run;
       const last = shown.length - 1;
       const v = view(d, state.window, 16);
       const [lo, hi] = [tori[0].alpha, tori[tori.length - 1].alpha];
       const alone = last ? 1 : TORI.alone;
       const span = TORI.length * TORI.steps * alone;
-      d.canvas.style.opacity = done ? 1 : smooth((state.seconds - t) / TORI.fade);
       // the point on the canvas of an orbit at a step that is not whole
       const point = (torus, at, turn) => {
         const from = Math.floor(at);
@@ -348,7 +353,7 @@
         const orbits = Math.round((TORI.streams + TORI.more * n) * alone);
         // on a dark ground the colormap is turned around, so that the largest torus is the closest to the ground in both modes
         const value = (tori[n].alpha - lo) / (hi - lo);
-        g.fillStyle = colors.map('magma', colors.dark && last ? 1 - value : value, 0.95, !colors.dark || !last);
+        g.fillStyle = colors.map('magma', colors.dark && last ? 1 - value : value, 0.95, true, TORI.magma);
         g.beginPath();
         for (let r = 0; r < orbits; r++) {
           // a train is walked from its head backward, a dot at each spacing of its length
@@ -633,8 +638,7 @@
       if (!this.ok || !this.fit()) return;
       this.g.setTransform(this.k, 0, 0, this.k, 0, 0);
       this.g.clearRect(0, 0, this.w, this.h);
-      const seconds = this.state.seconds ?? this.kind.seconds;
-      this.kind.draw(this, Number.isFinite(t) && seconds ? t % seconds : t);
+      this.kind.draw(this, Number.isFinite(t) && this.kind.seconds ? t % this.kind.seconds : t);
     }
 
     start() {
@@ -647,7 +651,9 @@
         const t = (now - first) / 1000;
         if (t - last < FRAME) return;
         last = t;
-        this.draw(t);
+        // a drawing that ends stays complete
+        if (t >= this.kind.ends) this.still();
+        else this.draw(t);
       };
       this.raf = requestAnimationFrame(frame);
     }
