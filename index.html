@@ -248,8 +248,8 @@ try {
       </ul>
     </li>
   </ol>
-  <div class="figure-box family lower-left" data-family="tori"></div>
-  <div class="figure-box family lower-right" data-family="tori" data-family-select="view=xz"></div>
+  <div class="backdrop" data-backdrop="tori" data-live style="translate: -964px 600px; width: 644px; height: 396px"></div>
+  <div class="backdrop" data-backdrop="tori" data-plane="xz" data-live style="translate: -163px 600px; width: 644px; height: 396px"></div>
 </section>
 
 <section class="section" data-run="What a normal form is">
@@ -668,7 +668,7 @@ For questions:
     <h2>At an equilibrium point</h2>
     <ul class="outline" data-auto></ul>
   </div>
-  <div class="figure-box family" data-family="section" data-family-select="system=sun-earth-l1"></div>
+  <div class="backdrop" data-backdrop="poincare" data-system="sun-earth-l1"></div>
 </section>
 
 <section class="section" data-run="Time-periodic model">
@@ -676,7 +676,7 @@ For questions:
     <h2>At a periodic orbit of a time-periodic model</h2>
     <ul class="outline" data-auto></ul>
   </div>
-  <div class="figure-box family" data-family="tori" data-family-select="torus=0.18"></div>
+  <div class="backdrop" data-backdrop="tori" data-tori="0.18"></div>
 </section>
 
 <section class="section" data-run="Autonomous model">
@@ -733,8 +733,6 @@ For questions:
 <script>Beeson.start({});</script>
 <script src="demos/cr3bp-frame/cr3bp-frame.js"></script>
 <script src="demos/morph/morph.js"></script>
-<script src="demos/families/section-sun-earth-l1.js"></script>
-<script src="demos/families/tori.js"></script>
 <script src="demos/families/families.js"></script>
 </body>
 </html>
