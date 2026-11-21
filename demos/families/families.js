@@ -1,7 +1,9 @@
 // the drawings of families of invariant objects, each drawn on a canvas in a div.family and named
 // in its data-family: section, tori, or normal-form. load this file after theme/beeson.js, and the
 // data of each drawing of the deck in a script of its own, e.g. demos/families/section.js. a data
-// file is written by the script of the same name in data/.
+// file is written by the script of the same name in data/. a drawing fills the right of a section slide
+// and of a title or closing slide. on another slide, the classes lower-left and lower-right put it
+// in one of two boxes side by side in the lower half.
 //
 // a drawing is run over and over while its slide is shown, from its start each time the slide is
 // shown. it is drawn complete in the print view, under ?still, and under reduced motion. the colors
@@ -17,8 +19,8 @@
 //
 // tori: the unstable 2-tori near L5 in the bicircular problem (Figs. 8 and 9 of Simó et al. 1995), in
 // the plane of the primaries. on each of the ten computed tori, orbits that start on its invariant
-// curve are wound along it, first on the smallest torus and then on each larger one in turn. the tori
-// are colored by the vertical amplitude alpha in magma, the smaller ones over the larger ones.
+// curve run along it as trains of dots, first on the smallest torus and then on each larger one in
+// turn. the tori are colored by the vertical amplitude alpha in magma, the smaller ones over the larger ones.
 //
 // normal-form: the orbits near a saddle, drawn in standard coordinates and carried into the
 // coordinates of the normal form and back.
@@ -229,15 +231,16 @@
 
   // ---- tori ----------------------------------------------------------------------------------------------
   // the seconds of the trace of the periodic orbit, of the time between the starts of the first and the
-  // last torus, of the winding of one torus, of the rest, and of the fade. on a torus, streams orbits
-  // start at the same phase of the Sun and at even steps of the vertical phase, and each is wound over
-  // loops periods of the Sun, and over more periods on each larger torus, with steps points per period
-  const TORI = { orbit: 1.2, spread: 9.9, wind: 2.2, rest: 4, fade: 0.8, streams: 96, heads: 4, loops: 1.8, more: 0.23, steps: 48, harmonics: 5 };
+  // last torus, of the run of all tori, and of the fade. on the smallest torus, streams orbits start at
+  // the same phase of the Sun and at even steps of the vertical phase, and each larger torus has more
+  // orbits more. an orbit is drawn as a train of dots of radius dot, spacing apart and length periods of
+  // the Sun long, that runs along the torus at speed periods per second, with steps points per period
+  const TORI = { orbit: 1.2, spread: 9.9, run: 12, fade: 0.8, streams: 12, more: 1, length: 0.32, spacing: 5, speed: 0.27, dot: 1.6, steps: 96, harmonics: 5 };
   KINDS.tori = {
-    seconds: TORI.orbit + TORI.spread + TORI.wind + TORI.rest + TORI.fade,
+    seconds: TORI.orbit + TORI.spread + TORI.run + TORI.fade,
     prepare(data) {
-      const { harmonics: J, steps: M, streams: R } = TORI;
-      const tori = data.tori.map((torus, n) => {
+      const { harmonics: J, steps: M } = TORI;
+      const tori = data.tori.map((torus) => {
         // the coefficients as a table over k from 0 and j from -J, four numbers per harmonic
         const c = new Float64Array((J + 1) * (2 * J + 1) * 4);
         for (const [j, k, ...values] of torus.modes) c.set(values, (k * (2 * J + 1) + j + J) * 4);
@@ -256,26 +259,26 @@
             sums.set([xr, xi, yr, yi], (k * M + m) * 4);
           }
         }
-        return { alpha: torus.alpha, rotation: torus.rotation, sums, full: Math.round((TORI.loops + TORI.more * n) * M), drawn: 0 };
+        return { alpha: torus.alpha, rotation: torus.rotation, sums };
       });
-      const canvas = () => document.createElement('canvas');
-      const state = { tori, top: canvas(), under: canvas(), base: 0, time: -1, at: new Float64Array(2) };
+      const state = { tori, at: new Float64Array(2) };
       let [x0, x1, y0, y1] = [Infinity, -Infinity, Infinity, -Infinity];
-      for (let r = 0; r < R; r++) {
+      for (let r = 0; r < M; r++) {
         for (let n = 0; n < M; n++) {
-          const [x, y] = this.spot(state, tori[tori.length - 1], n, r);
+          const [x, y] = this.spot(state, tori[tori.length - 1], n, r / M);
           x0 = Math.min(x0, x); x1 = Math.max(x1, x); y0 = Math.min(y0, y); y1 = Math.max(y1, y);
         }
       }
       state.window = [x0, x1, y0, y1];
       return state;
     },
-    // the point of the orbit r of a torus after n steps. in the plane of the primaries a torus is
-    // covered twice by its vertical phase, so the orbits start within half a turn of it
-    spot(state, torus, n, r) {
-      const { harmonics: J, steps: M, streams: R } = TORI;
+    // the point after n steps of the orbit of a torus that starts at the part turn of half a turn of the
+    // vertical phase. in the plane of the primaries a torus is covered twice by its vertical phase, so
+    // the orbits start within half a turn of it
+    spot(state, torus, n, turn) {
+      const { harmonics: J, steps: M } = TORI;
       const m = n % M;
-      const phase = (Math.PI * r) / R + ((TAU + torus.rotation) * n) / M;
+      const phase = Math.PI * turn + ((TAU + torus.rotation) * n) / M;
       const s = torus.sums;
       let [x, y] = [s[m * 4], s[m * 4 + 2]];
       for (let k = 1; k <= J; k++) {
@@ -288,85 +291,62 @@
       state.at[1] = y;
       return state.at;
     },
-    // the orbits of a torus from the step from to the step to. each period of the Sun of each orbit is
-    // drawn as a line of its own, so that the lines add up where the orbits are dense
-    trail(k, v, state, torus, from, to) {
-      for (let r = 0; r < TORI.streams; r++) {
-        for (let a = from; a < to; ) {
-          const b = Math.min(to, (Math.floor(a / TORI.steps) + 1) * TORI.steps);
-          k.beginPath();
-          for (let n = a; n <= b; n++) {
-            const [x, y] = this.spot(state, torus, n, r);
-            k[n > a ? 'lineTo' : 'moveTo'](v.x + v.s * x, v.y - v.s * y);
-          }
-          k.stroke();
-          a = b;
-        }
-      }
-    },
     draw(d, t) {
       const { g, data, state, colors } = d;
-      const { tori, top, under } = state;
+      const { tori } = state;
+      // the complete drawing is the last frame before the fade, with every torus running
       const done = !Number.isFinite(t);
+      if (done) t = this.seconds - TORI.fade;
       const last = tori.length - 1;
-      const gap = TORI.spread / last;
-      const wind = Math.min(TORI.wind, 2 * gap);
-      // the part of the winding of the torus n that is done, and its steps
-      const part = (n) => (done ? 1 : clamp((t - TORI.orbit - n * gap) / wind));
-      const steps = (n) => Math.round(tori[n].full * part(n));
       const v = view(d, state.window, 16);
       const [lo, hi] = [tori[0].alpha, tori[last].alpha];
-      // on a dark ground the colormap is turned around, so that the largest torus is the closest to the ground in both modes
-      const color = (alpha, opacity) => {
-        const value = (alpha - lo) / (hi - lo);
-        return colors.map('magma', colors.dark ? 1 - value : value, opacity, !colors.dark);
-      };
+      const span = TORI.length * TORI.steps;
       d.canvas.style.opacity = done ? 1 : smooth((this.seconds - t) / TORI.fade);
-
-      // the lines are kept on two canvases. a line is drawn under the lines before it, so the smaller tori
-      // are over the larger ones. at most two tori are wound at a time: the smaller on the canvas top, with
-      // the finished ones, and the larger on the canvas under, which is put under top when the smaller is done
-      if (d.changed || top.width !== d.canvas.width || top.height !== d.canvas.height || t < state.time) {
-        for (const canvas of [top, under]) { canvas.width = d.canvas.width; canvas.height = d.canvas.height; }
-        for (const torus of tori) torus.drawn = 0;
-        state.base = 0;
-      }
-      state.time = t;
-      const pen = (canvas, torus) => {
-        const k = canvas.getContext('2d');
-        k.setTransform(d.k, 0, 0, d.k, 0, 0);
-        k.globalCompositeOperation = 'destination-over';
-        k.lineWidth = 0.8;
-        k.lineJoin = 'round';
-        k.strokeStyle = color(torus.alpha, 0.6);
-        return k;
+      // the point on the canvas of an orbit at a step that is not whole
+      const point = (torus, at, turn) => {
+        const from = Math.floor(at);
+        const [ax, ay] = this.spot(state, torus, from, turn);
+        const [bx, by] = this.spot(state, torus, from + 1, turn);
+        return [v.x + v.s * (ax + (bx - ax) * (at - from)), v.y - v.s * (ay + (by - ay) * (at - from))];
       };
-      const wound = (canvas, n) => {
-        const to = steps(n);
-        if (to > tori[n].drawn) this.trail(pen(canvas, tori[n]), v, state, tori[n], tori[n].drawn, to);
-        tori[n].drawn = to;
+      const dot = (x, y, size) => {
+        g.moveTo(x + TORI.dot * size, y);
+        g.arc(x, y, TORI.dot * size, 0, TAU);
       };
-      while (state.base <= last) {
-        wound(top, state.base);
-        if (tori[state.base].drawn < tori[state.base].full) {
-          if (state.base < last) wound(under, state.base + 1);
-          break;
+      // the larger tori are drawn first, so the smaller ones are over them
+      for (let n = last; n >= 0; n--) {
+        const head = (t - TORI.orbit - (n * TORI.spread) / last) * TORI.speed * TORI.steps;
+        if (head <= 0) continue;
+        const first = Math.max(0, head - span);
+        const orbits = Math.round(TORI.streams + TORI.more * n);
+        // on a dark ground the colormap is turned around, so that the largest torus is the closest to the ground in both modes
+        const value = (tori[n].alpha - lo) / (hi - lo);
+        g.fillStyle = colors.map('magma', colors.dark ? 1 - value : value, 0.95, !colors.dark);
+        g.beginPath();
+        for (let r = 0; r < orbits; r++) {
+          // a train is walked from its head backward, a dot at each spacing of its length
+          let a = head;
+          let [px, py] = point(tori[n], a, r / orbits);
+          dot(px, py, 1.25);
+          let carry = TORI.spacing;
+          while (a > first) {
+            const b = Math.max(first, Math.ceil(a) - 1);
+            const [qx, qy] = point(tori[n], b, r / orbits);
+            const seg = Math.hypot(qx - px, qy - py);
+            while (carry <= seg) {
+              const f = carry / seg;
+              dot(px + (qx - px) * f, py + (qy - py) * f, 1 - (0.7 * (head - (a + (b - a) * f))) / span);
+              carry += TORI.spacing;
+            }
+            carry -= seg;
+            [a, px, py] = [b, qx, qy];
+          }
         }
-        const k = top.getContext('2d');
-        k.setTransform(1, 0, 0, 1, 0, 0);
-        k.globalCompositeOperation = 'destination-over';
-        k.drawImage(under, 0, 0);
-        under.width = d.canvas.width;
-        state.base += 1;
+        g.fill();
       }
-      g.save();
-      g.setTransform(1, 0, 0, 1, 0, 0);
-      g.drawImage(under, 0, 0);
-      g.drawImage(top, 0, 0);
-      g.restore();
       // the periodic orbit, traced first, and the point L5 as a cross
       const orbit = data.orbit;
-      const traced = done ? 1 : smooth(t / TORI.orbit);
+      const traced = smooth(t / TORI.orbit);
       g.strokeStyle = colors.text;
       g.lineWidth = 1.6;
       g.lineJoin = 'round';
@@ -381,28 +361,6 @@
       g.beginPath();
       for (const s of [1, -1]) { g.moveTo(v.x - 7, v.y - 7 * s); g.lineTo(v.x + 7, v.y + 7 * s); }
       g.stroke();
-      // the head of every fourth orbit that is being wound, as a dot with an edge in the color of the ground
-      g.fillStyle = colors.text;
-      g.strokeStyle = colors.ground;
-      g.lineWidth = 1;
-      tori.forEach((torus, n) => {
-        const u = part(n);
-        if (u <= 0 || u >= 1) return;
-        g.globalAlpha = 0.85 * Math.min(1, 8 * u, 5 * (1 - u));
-        const at = torus.full * u;
-        const from = Math.floor(at);
-        g.beginPath();
-        for (let r = 0; r < TORI.streams; r += TORI.heads) {
-          const [ax, ay] = this.spot(state, torus, from, r);
-          const [bx, by] = this.spot(state, torus, from + 1, r);
-          const x = v.x + v.s * (ax + (bx - ax) * (at - from));
-          const y = v.y - v.s * (ay + (by - ay) * (at - from));
-          g.moveTo(x + 2, y);
-          g.arc(x, y, 2, 0, TAU);
-        }
-        g.fill();
-        g.stroke();
-      });
       g.globalAlpha = 1;
     },
   };
@@ -575,6 +533,8 @@
 .reveal .slides section .family > canvas { position: absolute; left: 0; top: 0; width: 100%; height: 100%; }
 .reveal .slides section.section .figure-box.family { left: 1040px; top: 0; width: 880px; height: 1080px; }
 .reveal .slides section:is(.title, .closing) .figure-box.family { left: 960px; top: 0; width: 960px; height: 1080px; }
+.reveal .slides section .figure-box.family.lower-left { left: 236px; top: 600px; width: 644px; height: 396px; }
+.reveal .slides section .figure-box.family.lower-right { left: 1037px; top: 600px; width: 644px; height: 396px; }
 `;
 
   class Drawing {
