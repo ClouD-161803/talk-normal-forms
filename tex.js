@@ -14,8 +14,6 @@ window.beesonTex = {
     "definition": {"title":"Definition","style":"definition","counter":"definition"},
   },
   "references": {
-    "benettin1998": {"authors":"Benettin et al.","title":"Nekhoroshev-stability of $L_4$ and $L_5$ in the spatial restricted three-body problem","venue":"Regular and Chaotic Dynamics","volume":"3","year":"1998","doi":"10.1070/RD1998v003n03ABEH000080"},
-    "carcamo2020": {"authors":"C\u00e1rcamo-D\u00edaz et al.","title":"On the nonlinear stability of the triangular points in the circular spatial restricted three-body problem","venue":"Regular and Chaotic Dynamics","volume":"25","year":"2020","doi":"10.1134/S156035472002001X"},
     "gomez2001": {"authors":"G\u00f3mez et al.","title":"Dynamics and Mission Design Near Libration Points. Vol. IV: Advanced Methods for Triangular Points","venue":"World Scientific","year":"2001","doi":"10.1142/4336"},
     "guckenheimer1983": {"authors":"Guckenheimer & Holmes","title":"Nonlinear Oscillations, Dynamical Systems, and Bifurcations of Vector Fields","venue":"Springer","year":"1983","doi":"10.1007/978-1-4612-1140-2"},
     "jorba1999": {"authors":"Jorba","title":"A methodology for the numerical computation of normal forms, centre manifolds and first integrals of Hamiltonian systems","venue":"Experimental Mathematics","volume":"8","year":"1999","doi":"10.1080/10586458.1999.10504397"},
