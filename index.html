@@ -672,29 +672,6 @@ For questions:
   <div class="figure-box family" data-family="section" data-family-select="system=sun-earth-l1"></div>
 </section>
 
-<section class="wide" id="stability" data-visibility="hidden" data-timing="90">
-  <h2>Which libration points are stable?</h2>
-  <table class="compare">
-    <thead>
-      <tr><th style="width: 340px"></th><th style="width: 600px">Linear part</th><th style="width: 640px">Full problem</th></tr>
-    </thead>
-    <tbody>
-      <tr><td>\(\mathcal{L}_1\), \(\mathcal{L}_2\), \(\mathcal{L}_3\)</td><td>saddle × center × center</td><td>unstable for every \(\mu\)</td></tr>
-      <tr><td>\(\mathcal{L}_4\), \(\mathcal{L}_5\), planar</td><td>two centers for \(\mu &lt; \mu_R \approx 0.0385\)</td><td>stable, except at two values of \(\mu\)</td></tr>
-      <tr><td>\(\mathcal{L}_4\), \(\mathcal{L}_5\), spatial</td><td>three centers for \(\mu &lt; \mu_R\)</td><td><span class="tone-accent">an open problem</span></td></tr>
-    </tbody>
-  </table>
-  <p class="fragment" data-fragment-index="1" style="width: 1340px">Invariant tori trap the orbits in the plane, but not in space.</p>
-  <p class="fragment" data-fragment-index="2" style="width: 1340px">Proved in space: most orbits lie on tori, and the others stay close for an exponentially long time.<cite data-key="carcamo2020,benettin1998"></cite></p>
-  <p class="fragment" data-fragment-index="3" style="width: 1340px">Each of these results is proved with a normal form.</p>
-  <aside class="notes">
-    <p>Step 0: Before the results, what is known about the five points. The collinear points have a saddle direction for every mass ratio, hence they are unstable, and this is why we reduce to the center manifold there. The triangular points are linearly stable below the mass ratio of Routh, about 0.0385 (Gascheau 1843, Routh 1875). In the planar problem the question is closed. They are stable for every mass ratio below Routh's, apart from two values, 0.0243 and 0.0135, where the frequencies are in a 1:2 and a 1:3 resonance and the point is unstable (Deprit and Deprit-Bartholomé 1967, Markeev 1969, Alfriend 1970, Meyer and Schmidt 1986). In the spatial problem nobody has proved stability, and nobody has proved instability, apart from the same two values.</p>
-    <p>Step 1: The reason is a count of dimensions. With two degrees of freedom, an energy level has three dimensions, and a torus of two dimensions splits it into an inside and an outside. An orbit between two tori is trapped. With three degrees of freedom, the level has five dimensions and the tori have three, hence they do not separate it. The energy does not help either, since the quadratic part has frequencies of both signs.</p>
-    <p>Step 2: What is proved in space is weaker. Most orbits near the point lie on invariant tori (Markeev 1971). For all but a countable set of mass ratios, the point is stable to every order of the normal form (Cárcamo-Díaz, Palacián, Vidal, Yanguas 2020). And an orbit that starts at a distance r stays close for a time that grows as an exponential of a power of 1/r (Benettin, Fassò, Guzzo 1998). For questions: Fayad built in 2023 analytic Hamiltonians with an unstable elliptic point of this kind, hence stability is not automatic, but his examples are not the three-body problem.</p>
-    <p>Step 3: Every row of this table is a normal form computation. Degree 2 for the collinear points, degree 4 and 6 for the planar result, a resonant normal form at the two exceptions, and a high degree for the exponential times. This last one is what Jorba computes at L5, and what we reproduce next.</p>
-  </aside>
-</section>
-
 <section class="section" data-run="Time-periodic model">
   <div class="sec">
     <h2>At a periodic orbit of a time-periodic model</h2>
