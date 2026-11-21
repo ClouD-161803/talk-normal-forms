@@ -1,9 +1,16 @@
 // the drawings of families of invariant objects, each drawn on a canvas in a div.family and named
 // in its data-family: section, tori, or normal-form. load this file after theme/beeson.js, and the
-// data of each drawing of the deck in a script of its own, e.g. demos/families/section.js. a data
-// file is written by the script of the same name in data/. a drawing fills the right of a section slide
+// data of each drawing of the deck in a script of its own, e.g. demos/families/tori.js. the data
+// files are written by data/section.py and data/tori.py. a drawing fills the right of a section slide
 // and of a title or closing slide. on another slide, the classes lower-left and lower-right put it
 // in one of two boxes side by side in the lower half.
+//
+// the version of a drawing is picked in its data-family-select, as terms key=value separated by
+// commas, e.g. data-family-select="view=xz,torus=0.18". the keys and values of a drawing are listed
+// in its picks, the first value of a key being the one drawn without a term. with ?pick in the address
+// of the deck, a bar at the top has a popup for each key of the drawings of the shown slide. a pick
+// in the bar is drawn at once, and the bar shows the tag to write into the deck, since the bar does
+// not write it. a data file that the deck does not load is loaded when a drawing needs it.
 //
 // a drawing is run over and over while its slide is shown, from its start each time the slide is
 // shown. it is drawn complete in the print view, under ?still, and under reduced motion. the colors
@@ -11,16 +18,17 @@
 // of a colormap is moved toward the other end until its color has a contrast of 3:1 against the ground,
 // or of 1.6:1 where the colormap is used whole.
 //
-// section: the section q3 = 0 of the center manifold of the Earth-Moon L2 (Fig. 6 of Jorba and
-// Masdemont 1999). the energy h rises from 0.2 to 1.0. each orbit is drawn as the dots of its
+// section: the section q3 = 0 of the center manifold of the Earth-Moon L2 or of the Sun-Earth L1
+// (Figs. 6 and 3 of Jorba and Masdemont 1999), picked in system. the energy h rises from 0.2 to 1.0. each orbit is drawn as the dots of its
 // crossings, colored by its rotation number in plasma, and the dots are carried around the curve of
 // the orbit while its rotation number changes. the boundary of the section, the planar Lyapunov orbit,
 // is not drawn, and the halo orbits are born at it.
 //
 // tori: the unstable 2-tori near L5 in the bicircular problem (Figs. 8 and 9 of Simó et al. 1995), in
-// the plane of the primaries. on each of the ten computed tori, orbits that start on its invariant
-// curve run along it as trains of dots, first on the smallest torus and then on each larger one in
-// turn. the tori are colored by the vertical amplitude alpha in magma, the smaller ones over the larger ones.
+// the plane of the primaries or, with view=xz, seen along the y axis. on each of the ten computed
+// tori, orbits that start on its invariant curve run along it as trains of dots, first on the smallest
+// torus and then on each larger one in turn. with torus, only the torus of this alpha is drawn. the
+// tori are colored by the vertical amplitude alpha in magma, the smaller ones over the larger ones.
 //
 // normal-form: the orbits near a saddle, drawn in standard coordinates and carried into the
 // coordinates of the normal form and back.
@@ -125,6 +133,8 @@
   const SECTION = { rise: 13, rest: 3, fade: 0.7, spacing: 7, speed: 330, dot: 1.4 };
   KINDS.section = {
     seconds: SECTION.rise + SECTION.rest + SECTION.fade,
+    picks: { system: [['earth-moon-l2', 'Earth-Moon L2'], ['sun-earth-l1', 'Sun-Earth L1']] },
+    source: (select) => `section-${select.system ?? 'earth-moon-l2'}`,
     prepare(data) {
       const points = decode(data.points);
       const frames = data.energies.length;
@@ -234,17 +244,26 @@
   // last torus, of the run of all tori, and of the fade. on the smallest torus, streams orbits start at
   // the same phase of the Sun and at even steps of the vertical phase, and each larger torus has more
   // orbits more. an orbit is drawn as a train of dots of radius dot, spacing apart and length periods of
-  // the Sun long, that runs along the torus at speed periods per second, with steps points per period. the
-  // periodic orbit and the cross at L5 are drawn at the opacity faint
-  const TORI = { orbit: 1.2, spread: 9.9, run: 12, fade: 0.8, streams: 12, more: 1, length: 0.55, spacing: 5, speed: 0.27, dot: 1.6, faint: 0.5, steps: 96, harmonics: 5 };
+  // the Sun long, that runs along the torus at speed periods per second, with steps points per period.
+  // the periodic orbit and the cross at L5 are drawn at the opacity faint. a torus drawn alone has
+// alone times the orbits and the length of a train, and the color of its alpha in both modes. in the
+// view along the y axis, x is drawn wide times larger than z, as in the figure of DyLAN
+  const TORI = { orbit: 1.2, spread: 9.9, run: 12, fade: 0.8, streams: 12, more: 1, length: 0.55, spacing: 5, speed: 0.27, dot: 1.6, faint: 0.5, alone: 2, wide: 5.5, steps: 96, harmonics: 5 };
   KINDS.tori = {
-    seconds: TORI.orbit + TORI.spread + TORI.run + TORI.fade,
-    prepare(data) {
+    picks: {
+      view: [['xy', 'x, y'], ['xz', 'x, z']],
+      torus: [['', 'All ten'], ...Array.from({ length: 10 }, (_, n) => ((n + 1) / 50).toFixed(2)).map((alpha) => [alpha, `α = ${alpha}`])],
+    },
+    prepare(data, select) {
       const { harmonics: J, steps: M } = TORI;
+      // the coordinate drawn upward: y, or z in the view along the y axis
+      const up = select.view === 'xz' ? 2 : 1;
+      const wide = up === 2 ? TORI.wide : 1;
       const tori = data.tori.map((torus) => {
-        // the coefficients as a table over k from 0 and j from -J, four numbers per harmonic
+        // the coefficients of x and of the coordinate drawn upward, as a table over k from 0 and j
+        // from -J, four numbers per harmonic
         const c = new Float64Array((J + 1) * (2 * J + 1) * 4);
-        for (const [j, k, ...values] of torus.modes) c.set(values, (k * (2 * J + 1) + j + J) * 4);
+        for (const [j, k, ...values] of torus.modes) c.set([wide * values[0], wide * values[1], values[2 * up], values[2 * up + 1]], (k * (2 * J + 1) + j + J) * 4);
         // the sums over the harmonics of the phase of the Sun, at each of its M phases
         const sums = new Float64Array((J + 1) * M * 4);
         for (let k = 0; k <= J; k++) {
@@ -262,24 +281,29 @@
         }
         return { alpha: torus.alpha, rotation: torus.rotation, sums };
       });
-      const state = { tori, at: new Float64Array(2) };
-      let [x0, x1, y0, y1] = [Infinity, -Infinity, Infinity, -Infinity];
+      const only = data.tori.findIndex((torus) => torus.alpha === Number(select.torus));
+      const shown = only < 0 ? tori.map((_, n) => n) : [only];
+      const spread = shown.length > 1 ? TORI.spread : 0;
+      // in the plane of the primaries a torus is covered twice by its vertical phase, so the orbits
+      // start within half a turn of it
+      const state = { tori, shown, spread, turns: up === 1 ? Math.PI : TAU, seconds: TORI.orbit + spread + TORI.run + TORI.fade, at: new Float64Array(2) };
+      // the periodic orbit is in the plane of the primaries
+      state.orbit = data.orbit.map(([x, y]) => [wide * x, up === 1 ? y : 0]);
+      let [x0, x1, y0, y1] = [0, 0, 0, 0];
+      const hold = (x, y) => { x0 = Math.min(x0, x); x1 = Math.max(x1, x); y0 = Math.min(y0, y); y1 = Math.max(y1, y); };
+      for (const [x, y] of state.orbit) hold(x, y);
       for (let r = 0; r < M; r++) {
-        for (let n = 0; n < M; n++) {
-          const [x, y] = this.spot(state, tori[tori.length - 1], n, r / M);
-          x0 = Math.min(x0, x); x1 = Math.max(x1, x); y0 = Math.min(y0, y); y1 = Math.max(y1, y);
-        }
+        for (let n = 0; n < M; n++) hold(...this.spot(state, tori[shown[shown.length - 1]], n, r / M));
       }
       state.window = [x0, x1, y0, y1];
       return state;
     },
-    // the point after n steps of the orbit of a torus that starts at the part turn of half a turn of the
-    // vertical phase. in the plane of the primaries a torus is covered twice by its vertical phase, so
-    // the orbits start within half a turn of it
+    // the point after n steps of the orbit of a torus that starts at the part turn of the turns of
+    // the vertical phase
     spot(state, torus, n, turn) {
       const { harmonics: J, steps: M } = TORI;
       const m = n % M;
-      const phase = Math.PI * turn + ((TAU + torus.rotation) * n) / M;
+      const phase = state.turns * turn + ((TAU + torus.rotation) * n) / M;
       const s = torus.sums;
       let [x, y] = [s[m * 4], s[m * 4 + 2]];
       for (let k = 1; k <= J; k++) {
@@ -294,15 +318,16 @@
     },
     draw(d, t) {
       const { g, data, state, colors } = d;
-      const { tori } = state;
+      const { tori, shown } = state;
       // the complete drawing is the last frame before the fade, with every torus running
       const done = !Number.isFinite(t);
-      if (done) t = this.seconds - TORI.fade;
-      const last = tori.length - 1;
+      if (done) t = state.seconds - TORI.fade;
+      const last = shown.length - 1;
       const v = view(d, state.window, 16);
-      const [lo, hi] = [tori[0].alpha, tori[last].alpha];
-      const span = TORI.length * TORI.steps;
-      d.canvas.style.opacity = done ? 1 : smooth((this.seconds - t) / TORI.fade);
+      const [lo, hi] = [tori[0].alpha, tori[tori.length - 1].alpha];
+      const alone = last ? 1 : TORI.alone;
+      const span = TORI.length * TORI.steps * alone;
+      d.canvas.style.opacity = done ? 1 : smooth((state.seconds - t) / TORI.fade);
       // the point on the canvas of an orbit at a step that is not whole
       const point = (torus, at, turn) => {
         const from = Math.floor(at);
@@ -315,14 +340,15 @@
         g.arc(x, y, TORI.dot * size, 0, TAU);
       };
       // the larger tori are drawn first, so the smaller ones are over them
-      for (let n = last; n >= 0; n--) {
-        const head = (t - TORI.orbit - (n * TORI.spread) / last) * TORI.speed * TORI.steps;
+      for (let i = last; i >= 0; i--) {
+        const n = shown[i];
+        const head = (t - TORI.orbit - (last ? (i * state.spread) / last : 0)) * TORI.speed * TORI.steps;
         if (head <= 0) continue;
         const first = Math.max(0, head - span);
-        const orbits = Math.round(TORI.streams + TORI.more * n);
+        const orbits = Math.round((TORI.streams + TORI.more * n) * alone);
         // on a dark ground the colormap is turned around, so that the largest torus is the closest to the ground in both modes
         const value = (tori[n].alpha - lo) / (hi - lo);
-        g.fillStyle = colors.map('magma', colors.dark ? 1 - value : value, 0.95, !colors.dark);
+        g.fillStyle = colors.map('magma', colors.dark && last ? 1 - value : value, 0.95, !colors.dark || !last);
         g.beginPath();
         for (let r = 0; r < orbits; r++) {
           // a train is walked from its head backward, a dot at each spacing of its length
@@ -346,15 +372,15 @@
         g.fill();
       }
       // the periodic orbit, traced first, and the point L5 as a cross
-      const orbit = data.orbit;
+      const orbit = state.orbit;
       const traced = smooth(t / TORI.orbit);
       g.strokeStyle = colors.text;
       g.lineWidth = 1.2;
       g.lineJoin = 'round';
       g.globalAlpha = TORI.faint;
       g.beginPath();
-      const shown = Math.round(traced * orbit.length);
-      for (let n = 0; n <= shown; n++) {
+      const points = Math.round(traced * orbit.length);
+      for (let n = 0; n <= points; n++) {
         const [x, y] = orbit[n % orbit.length];
         g[n ? 'lineTo' : 'moveTo'](v.x + v.s * x, v.y - v.s * y);
       }
@@ -537,13 +563,38 @@
 .reveal .slides section:is(.title, .closing) .figure-box.family { left: 960px; top: 0; width: 960px; height: 1080px; }
 .reveal .slides section .figure-box.family.lower-left { left: 236px; top: 600px; width: 644px; height: 396px; }
 .reveal .slides section .figure-box.family.lower-right { left: 1037px; top: 600px; width: 644px; height: 396px; }
+#family-picks { position: fixed; left: 50%; top: 8px; translate: -50% 0; z-index: 99; max-width: calc(100vw - 32px); box-sizing: border-box; padding: 8px 12px; border: 1px solid color-mix(in srgb, var(--text) 30%, transparent); border-radius: 8px; background: var(--bg); color: var(--text); font: 14px/1.4 system-ui, sans-serif; }
+#family-picks:empty { display: none; }
+#family-picks > div { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; }
+#family-picks > div + div { margin-top: 6px; }
+#family-picks select { font: inherit; }
+#family-picks code { flex-basis: 100%; font: 12px/1.4 ui-monospace, monospace; user-select: all; overflow-wrap: anywhere; }
 `;
+
+  // the terms of the data-family-select of a drawing
+  const terms = (el) => Object.fromEntries((el.dataset.familySelect ?? '').split(',').map((term) => term.trim().split('=')).filter(([key, value]) => key && value));
+
+  // loads the data file of a name from the folder of this file, and calls then when it is loaded
+  const FOLDER = document.currentScript.src.replace(/[^/]*$/, '');
+  const loading = new Map();
+  function load(name, then) {
+    let script = loading.get(name);
+    if (!script) {
+      script = Object.assign(document.createElement('script'), { src: `${FOLDER}${name}.js` });
+      script.addEventListener('error', () => console.warn(`families: no data file ${script.src}`));
+      loading.set(name, script);
+      document.head.append(script);
+    }
+    script.addEventListener('load', then, { once: true });
+  }
 
   class Drawing {
     constructor(el) {
       this.el = el;
       this.kind = KINDS[el.dataset.family];
-      this.data = DATA[el.dataset.family];
+      this.select = terms(el);
+      this.source = this.kind?.source?.(this.select) ?? el.dataset.family;
+      this.data = DATA[this.source];
       // a drawing cloned with its slide, as in the print view, carries the canvas of its original
       for (const old of el.querySelectorAll(':scope > canvas')) old.remove();
       this.canvas = document.createElement('canvas');
@@ -551,8 +602,9 @@
       this.g = this.canvas.getContext('2d');
       // the drawing normal-form is computed here and has no data
       this.ok = !!(this.kind && (this.data || this.kind.computed));
-      if (!this.ok) console.warn(`families: no drawing or no data for data-family="${el.dataset.family}"`);
-      else this.state = this.kind.prepare(this.data);
+      if (this.ok) this.state = this.kind.prepare(this.data, this.select);
+      else if (this.kind) load(this.source, () => made.get(el) === this && remake(el));
+      else console.warn(`families: no drawing for data-family="${el.dataset.family}"`);
       this.raf = 0;
       this.mode = null;
     }
@@ -581,7 +633,8 @@
       if (!this.ok || !this.fit()) return;
       this.g.setTransform(this.k, 0, 0, this.k, 0, 0);
       this.g.clearRect(0, 0, this.w, this.h);
-      this.kind.draw(this, Number.isFinite(t) && this.kind.seconds ? t % this.kind.seconds : t);
+      const seconds = this.state.seconds ?? this.kind.seconds;
+      this.kind.draw(this, Number.isFinite(t) && seconds ? t % seconds : t);
     }
 
     start() {
@@ -617,6 +670,14 @@
     return d;
   };
   const within = (slide) => (slide ? [...slide.querySelectorAll('.family')].map(drawing) : []);
+  // makes the drawing of an element again, after a change of its data-family or data-family-select
+  function remake(el) {
+    made.get(el)?.stop();
+    made.delete(el);
+    const d = drawing(el);
+    if (!still() && el.closest('section') === window.Reveal.getCurrentSlide()) d.start();
+    else d.still();
+  }
   const all = () => [...document.querySelectorAll('.family')];
 
   function addStyle() {
@@ -642,11 +703,47 @@
     show(slide);
   }
 
+  // the bar of ?pick: for each drawing of the slide, a popup for each key of its picks, and its tag
+  function pickBar(slide) {
+    let bar = document.getElementById('family-picks');
+    if (!bar) document.body.append((bar = Object.assign(document.createElement('div'), { id: 'family-picks' })));
+    bar.replaceChildren();
+    for (const el of slide?.querySelectorAll('.family') ?? []) {
+      const picks = KINDS[el.dataset.family]?.picks;
+      if (!picks) continue;
+      const row = document.createElement('div');
+      const tag = document.createElement('code');
+      const write = () => { tag.textContent = el.cloneNode(false).outerHTML; };
+      row.append(Object.assign(document.createElement('b'), { textContent: el.dataset.family }));
+      for (const [key, values] of Object.entries(picks)) {
+        const popup = document.createElement('select');
+        for (const [value, name] of values) popup.append(new Option(name, value));
+        popup.value = terms(el)[key] ?? values[0][0];
+        popup.addEventListener('change', () => {
+          const now = { ...terms(el), [key]: popup.value };
+          // the first value of a key is drawn without a term
+          const text = Object.keys(picks).filter((k) => now[k] && now[k] !== picks[k][0][0]).map((k) => `${k}=${now[k]}`).join(',');
+          if (text) el.dataset.familySelect = text;
+          else delete el.dataset.familySelect;
+          write();
+        });
+        const label = document.createElement('label');
+        label.append(`${key} `, popup);
+        row.append(label);
+      }
+      write();
+      row.append(tag);
+      bar.append(row);
+    }
+  }
+  const picking = /[?&]pick\b/.test(location.search) && !/[?&]edit\b/.test(location.search);
+
   const deck = window.Reveal;
-  deck.on('ready', (ev) => ready(ev.currentSlide));
+  deck.on('ready', (ev) => { ready(ev.currentSlide); if (picking) pickBar(ev.currentSlide); });
   deck.on('slidechanged', (ev) => {
     for (const d of within(ev.previousSlide)) d.still();
     show(ev.currentSlide);
+    if (picking) pickBar(ev.currentSlide);
   });
   deck.on('resize', () => {
     for (const d of within(deck.getCurrentSlide())) if (!d.raf) d.still();
@@ -663,7 +760,10 @@
   new MutationObserver(() => {
     for (const d of within(deck.getCurrentSlide?.())) if (!d.raf) d.still();
   }).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
-  if (deck.isReady()) ready(deck.getCurrentSlide());
+  new MutationObserver((changes) => {
+    for (const { target } of changes) if (target.matches('.family')) remake(target);
+  }).observe(document.querySelector('.reveal .slides'), { attributes: true, subtree: true, attributeFilter: ['data-family', 'data-family-select'] });
+  if (deck.isReady()) { ready(deck.getCurrentSlide()); if (picking) pickBar(deck.getCurrentSlide()); }
 
   // read by a script that takes pictures of a drawing at chosen times
   window.Families = { drawing };

@@ -1,13 +1,14 @@
 """The section of the center manifold at a ladder of energies, written for the drawing ``section``.
 
-The center manifold of the Earth-Moon :math:`L_2` is cut by :math:`q_3 = 0` with :math:`p_3 > 0`
-on a level :math:`h` of its Hamiltonian (Fig. 6 of Jorba and Masdemont 1999). DyLAN reduced the
-Hamiltonian to the center manifold at degree 20 and computed the section at a ladder of energies
-from 0.2 to 1.0. The file sections.npz holds, at each energy, the boundary of the section, the
-vertical Lyapunov orbit, the halo orbits, and 80 crossings of the orbits about the vertical
-Lyapunov orbit and about each halo orbit. The orbits start at fixed fractions of the way from
-their fixed point to the boundary. The file was written by
-``_support/_python/center-manifold-section-ladder.py`` in the vault.
+The center manifold of the Earth-Moon :math:`L_2` or of the Sun-Earth :math:`L_1` is cut by
+:math:`q_3 = 0` with :math:`p_3 > 0` on a level :math:`h` of its Hamiltonian (Figs. 6 and 3 of
+Jorba and Masdemont 1999). DyLAN reduced the Hamiltonian to the center manifold at degree 20 and
+computed the section at a ladder of energies from 0.2 to 1.0. The file sections-earth-moon-l2.npz
+or sections-sun-earth-l1.npz holds, at each energy, the boundary of the section, the vertical
+Lyapunov orbit, the halo orbits, and 80 crossings of the orbits about the vertical Lyapunov orbit
+and about each halo orbit. The orbits start at fixed fractions of the way from their fixed point
+to the boundary. The files were written by ``_support/_python/center-manifold-section-ladder.py``
+in the vault.
 
 The crossings of an orbit lie on a closed curve around its fixed point. Function ``closed_curve``
 returns this curve as a polygon, and function ``evenly_spaced`` returns points at even steps of its
@@ -16,7 +17,8 @@ demos/families/families.js thus draws the section between two energies of the la
 interpolated in :math:`h`, and it colors each curve by its rotation number, as the figure of the
 DyLAN demonstration does.
 
-Run it with a Python that has numpy: ``python data/section.py`` writes demos/families/section.js.
+Run it with a Python that has numpy: ``python data/section.py`` writes
+demos/families/section-earth-moon-l2.js and demos/families/section-sun-earth-l1.js.
 """
 
 import base64
@@ -27,8 +29,7 @@ from pathlib import Path
 import numpy as np
 
 HERE = Path(__file__).resolve().parent
-DATA = HERE / "sections.npz"
-OUT = HERE.parent / "demos" / "families" / "section.js"
+SYSTEMS = ("earth-moon-l2", "sun-earth-l1")
 FIRST_ENERGY = 0.2
 POLYGON = 720
 # the Fourier series of a closed curve, and the weight of the penalty on its second derivative
@@ -96,8 +97,8 @@ def rotation_number(points, center):
     return abs(angles[-1] - angles[0]) / (2 * math.pi * (len(points) - 1))
 
 
-def section():
-    data = np.load(DATA)
+def section(system):
+    data = np.load(HERE / f"sections-{system}.npz")
     keep = np.flatnonzero(data["energies"] > FIRST_ENERGY - 1e-9)
     energies = data["energies"][keep]
     born = np.isfinite(data["halos"][keep]).all(axis=(1, 2))
@@ -163,7 +164,8 @@ def section():
 
 
 if __name__ == "__main__":
-    OUT.parent.mkdir(parents=True, exist_ok=True)
-    text = "(window.FamiliesData ??= {}).section = " + json.dumps(section(), separators=(",", ":")) + ";\n"
-    OUT.write_text(text)
-    print(f"{OUT.name}: {len(text)} bytes")
+    for system in SYSTEMS:
+        out = HERE.parent / "demos" / "families" / f"section-{system}.js"
+        text = f'(window.FamiliesData ??= {{}})["section-{system}"] = ' + json.dumps(section(system), separators=(",", ":")) + ";\n"
+        out.write_text(text)
+        print(f"{out.name}: {len(text)} bytes")
