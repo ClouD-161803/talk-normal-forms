@@ -1673,11 +1673,6 @@ For questions:
 <script src="theme/vendor/three/three.js"></script>
 <script src="theme/beeson.js"></script>
 <script>
-for (const cite of document.querySelectorAll('section.stab-slide cite[data-key]'))
-  for (const key of cite.dataset.key.split(',')) {
-    const ref = window.beesonTex?.references?.[key.trim()];
-    if (ref) { delete ref.venue; delete ref.volume; }
-  }
 Beeson.start({});
 </script>
 <script src="demos/cr3bp-frame/cr3bp-frame.js"></script>
