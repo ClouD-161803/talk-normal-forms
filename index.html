@@ -75,6 +75,7 @@ html[data-theme="light"] { --yellow: #8f6a00; }
     background: transparent;
     border-top: 0;
     border-bottom: 0;
+    --closing-rule: transparent;
   }
   .reveal .slides section.stab-slide table.stab-tbl th {
     padding: 4px 14px 8px 8px;
@@ -1673,11 +1674,6 @@ For questions:
 <script src="theme/vendor/three/three.js"></script>
 <script src="theme/beeson.js"></script>
 <script>
-for (const cite of document.querySelectorAll('section.stab-slide cite[data-key]'))
-  for (const key of cite.dataset.key.split(',')) {
-    const ref = window.beesonTex?.references?.[key.trim()];
-    if (ref) { delete ref.venue; delete ref.volume; }
-  }
 Beeson.start({});
 </script>
 <script src="demos/cr3bp-frame/cr3bp-frame.js"></script>
