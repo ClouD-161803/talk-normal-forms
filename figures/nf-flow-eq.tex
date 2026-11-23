@@ -1,0 +1,87 @@
+\begin{tikzpicture}[
+    reset cm,
+    x=1pt, y=1pt,
+    box/.style={draw=#1, fill=#1!14!bg, line width=0.5556pt, rounded corners=2pt,
+                minimum height=18pt, inner xsep=5pt, inner ysep=3pt, align=center},
+    lane/.style={draw=#1!60!bg, fill=#1!3!bg, line width=0.5556pt, dashed, rounded corners=5pt},
+    lanetitle/.style={font=\bfseries, text=#1, anchor=north},
+    flow/.style={->, >=stealth, line width=0.8333pt, draw=subtle},
+    label/.style={align=center, text=ink},
+    note/.style={align=center, text=ink, anchor=north},
+  ]
+
+  \node[box=muted, minimum width=86pt, minimum height=42pt] (n1) at (43,-68) {};
+
+  \begin{scope}[part=dyn]
+    \node[label, anchor=north] (dyn) at (43,-14) {CR3BP};
+    \draw[flow] (dyn.south) -- (n1.north);
+  \end{scope}
+
+  \begin{scope}[part=obj]
+    \node[label, anchor=north] (obj) at (18,-106) {Invariant\\object};
+    \draw[flow] (obj.north) -- (obj.north |- n1.south);
+  \end{scope}
+
+  \begin{scope}[part=typ]
+    \node[label, anchor=north] (typ) at (68,-106) {NF type};
+    \draw[flow] (typ.north) -- (typ.north |- n1.south);
+  \end{scope}
+
+  \begin{scope}[part=s1]
+    \node[label] at (n1) {Move the object\\to the origin};
+  \end{scope}
+
+  \begin{scope}[part=s2]
+    \node[box=muted, minimum height=42pt, anchor=west] (n2) at ([xshift=11pt]n1.east) {Diagonalize \(H_2\)\\\(H_2 = \sum_{i=1}^{3} \textcolor{violet}{\eta_i}\, q_i p_i\)};
+    \draw[flow] (n1.east) -- (n2.west);
+  \end{scope}
+
+  \begin{scope}[part=s3]
+    \node[box=violet, minimum height=42pt, anchor=west] (n3) at ([xshift=11pt]n2.east) {Expand \(H\) to order \(N\)\\\(H = H_2 + \sum_{d=3}^{N} H_d\)};
+    \draw[flow] (n2.east) -- (n3.west);
+  \end{scope}
+
+  \begin{scope}[part=s4]
+    \coordinate (L) at ([xshift=9pt]n3.east);
+    \coordinate (E) at ([xshift=4.5pt]n3.east);
+    \coordinate (Lr) at ([xshift=196pt]L);
+    \filldraw[lane=accent] ([yshift=54pt]L) rectangle ([xshift=202pt, yshift=-114pt]L);
+    \node[lanetitle=accent] at ([xshift=80pt, yshift=51pt]L) {For \(d = 3, \dots, N\)};
+    \node[box=accent, minimum width=150pt] (n4) at ([xshift=79pt, yshift=22pt]L) {Divisors: \(\langle \vb k_p - \vb k_q, \textcolor{violet}{\vb\eta} \rangle\)};
+    \draw[flow] (n3.east) -- (E) |- (n4.west);
+  \end{scope}
+
+  \begin{scope}[part=s5]
+    \node[box=accent, minimum width=150pt, anchor=north] (n5) at ([yshift=-10pt]n4.south) {Generating function \(\textcolor{accent}{G_d}\)\\(\textcolor{red}{killed} terms):\\[2pt]
+      \(\textcolor{accent}{G_d} = \sum\limits_{\textcolor{red}{\text{killed}}} \dfrac{-\textcolor{red}{h_{\vb k_q, \vb k_p}}}{\langle \vb k_p - \vb k_q, \textcolor{violet}{\vb\eta} \rangle}\, \vb q^{\vb k_q} \vb p^{\vb k_p}\)};
+    \draw[flow] (n4.south) -- (n5.north);
+  \end{scope}
+
+  \begin{scope}[part=s6]
+    \node[box=accent, minimum width=150pt, anchor=north] (n6) at ([yshift=-10pt]n5.south) {Lie series (kept terms \(\textcolor{blue}{\bar H_d}\)):\\[2pt]
+      \(\hat H = H + \{H, \textcolor{accent}{G_d}\}\)\\\(\quad + \tfrac{1}{2!}\{\{H, \textcolor{accent}{G_d}\}, \textcolor{accent}{G_d}\} + \dots\)};
+    \draw[flow] (n5.south) -- (n6.north);
+  \end{scope}
+
+  \begin{scope}[part=loop]
+    \draw[flow] (n6.east) -- (Lr |- n6.east) |- (n4.east);
+    \node[label, anchor=east] at ([xshift=-3pt]Lr |- n5.east) {\(H \gets \hat H\)};
+  \end{scope}
+
+  \begin{scope}[part=s7]
+    \coordinate (A) at ([xshift=213pt, yshift=-34pt]L);
+    \filldraw[draw=blue, fill=blue!5!bg, line width=0.5556pt, rounded corners=4pt] ([yshift=38pt]A) rectangle ([xshift=112pt, yshift=-38pt]A);
+    \node[label, anchor=north] at ([xshift=56pt, yshift=36pt]A) {Assemble};
+    \node[box=blue, minimum width=100pt, minimum height=22pt, anchor=north] (n7a) at ([xshift=56pt, yshift=20pt]A) {\(\textcolor{blue}{\bar H} = H_2 + \sum_{d=3}^{N} \textcolor{blue}{\bar H_d}\)};
+    \node[box=blue, minimum width=100pt, minimum height=22pt, anchor=north] (n7b) at ([yshift=-8pt]n7a.south) {\(\Phi = \varphi_{\textcolor{accent}{G_3}} \circ \dots \circ \varphi_{\textcolor{accent}{G_N}}\)};
+    \draw[flow] ([xshift=202pt, yshift=-34pt]L) -- (A);
+  \end{scope}
+
+  \begin{scope}[part=out]
+    \node[label, align=left, anchor=west] (o1) at ([xshift=20pt]n7a.east) {Normal\\form \(\textcolor{blue}{\bar H}\)};
+    \node[label, align=left, anchor=west] (o2) at ([xshift=20pt]n7b.east) {Coordinate\\change \(\Phi, \Phi^{-1}\)};
+    \draw[flow] (n7a.east) -- (o1.west);
+    \draw[flow] (n7b.east) -- (o2.west);
+  \end{scope}
+
+\end{tikzpicture}

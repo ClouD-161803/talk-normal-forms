@@ -167,13 +167,17 @@ def saddle_plot():
     return {
         "parameter": {"label": "$t$", "digits": 2},
         "duration": 7,
-        "hold": 1.5,
+        "hold": 0,
+        "fade": 0,
         "panels": [{"id": "phase", "equal": True, "margin": [130, 16, 84, 110],
                     "x": {"range": [-X_RANGE, X_RANGE], "ticks": [-4000, -2000, 0, 2000, 4000]},
                     "y": {"range": [-Y_RANGE, Y_RANGE], "ticks": [-2000, 0, 2000]},
                     "regions": regions, "curves": curves}],
         "marks": marks,
-        "tabs": [{"name": "flow", "label": "flow", "values": [round(float(t), 3) for t in times], "data": data},
+        "tabs": [{"name": "flow", "label": "flow",
+                  "times": [round(7 * i / (FRAMES - 1), 3) for i in range(FRAMES)] + [8.5],
+                  "values": [round(float(t), 3) for t in times] + [round(float(times[-1]), 3)],
+                  "data": {k: (v + [v[-1]] if len(v) == FRAMES else v) for k, v in data.items()}},
                  {"name": "orbit", "label": "orbit", "values": [round(float(t), 3) for t in period], "data": orbit}],
     }
 

@@ -1,11 +1,11 @@
 // Interactive degree slider for the Legendre expansion convergence plot (#legendre-conv).
-// Syncs automatically with slide fragments (data-leg-deg) and lets the speaker drag freely
+// Starts at data-deg each time the slide is entered and lets the speaker drag freely
 // across all precomputed degrees (2 to 20) in any browser, on desktops and phones, and in PDF export.
 (() => {
   const CSS = `
 .reveal .slides section.leg-exp .leg-plot [data-plot-id^="deg-"] { display: none; }
 .reveal .slides section.leg-exp .leg-plot [data-plot-id^="deg-"].deg-on { display: inline; }
-.reveal .slides section.leg-exp .leg-plot:not(:has(.deg-on)) [data-plot-id="deg-2"] { display: inline; }
+.reveal .slides section.leg-exp .leg-plot:not(:has(.deg-on)) :is([data-plot-id="deg-2"], [data-plot-id="deg-2-err"]) { display: inline; }
 .reveal .slides section.leg-exp .leg-slider {
   display: flex;
   align-items: center;
@@ -188,19 +188,14 @@
       const plotEl = this.plotEl();
       if (!plotEl) return;
       const nodes = plotEl.querySelectorAll('[data-plot-id^="deg-"]');
-      const target = `deg-${this.deg}`;
+      const on = [`deg-${this.deg}`, `deg-${this.deg}-err`];
       for (const el of nodes) {
-        el.classList.toggle('deg-on', el.getAttribute('data-plot-id') === target);
+        el.classList.toggle('deg-on', on.includes(el.getAttribute('data-plot-id')));
       }
     }
 
-    syncToSteps() {
-      if (!this.slide) return;
-      const frags = [...this.slide.querySelectorAll('.fragment.visible[data-leg-deg]')]
-        .sort((a, b) => Number(a.dataset.fragmentIndex || 0) - Number(b.dataset.fragmentIndex || 0));
-      const top = frags.at(-1);
-      const target = top ? Number(top.dataset.legDeg) : this.base;
-      this.set(Number.isFinite(target) ? target : this.base);
+    reset() {
+      this.set(this.base);
     }
   }
 
@@ -212,11 +207,11 @@
         ctrl = new LegendreSlider(host);
         made.set(host, ctrl);
       }
-      ctrl.syncToSteps();
+      ctrl.reset();
     }
   }
 
-  function syncSlide(slide) {
+  function resetSlide(slide) {
     if (!slide) return;
     for (const host of slide.querySelectorAll('[data-legendre-slider]')) {
       let ctrl = made.get(host);
@@ -224,7 +219,7 @@
         ctrl = new LegendreSlider(host);
         made.set(host, ctrl);
       }
-      ctrl.syncToSteps();
+      ctrl.reset();
     }
   }
 
@@ -234,15 +229,13 @@
       if (deck.isPrintView?.()) return;
       initAll(document);
     });
-    deck.on('slidechanged', (ev) => syncSlide(ev.currentSlide));
-    deck.on('fragmentshown', () => syncSlide(deck.getCurrentSlide()));
-    deck.on('fragmenthidden', () => syncSlide(deck.getCurrentSlide()));
+    deck.on('slidechanged', (ev) => resetSlide(ev.currentSlide));
     deck.on('pdf-ready', () => {
       addStyle();
       for (const host of document.querySelectorAll('[data-legendre-slider]')) {
         const ctrl = new LegendreSlider(host);
         made.set(host, ctrl);
-        ctrl.syncToSteps();
+        ctrl.reset();
       }
     });
     if (deck.isReady()) initAll(document);

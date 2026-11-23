@@ -26,7 +26,7 @@
   const EASE = 'cubic-bezier(0.65, 0, 0.35, 1)';
   const CSS = `
 [data-morph][data-scene] .m-off { opacity: 0; visibility: hidden; }
-.reveal .slides section[data-morph] .fragment { transition: none; }
+.reveal .slides section[data-morph] .fragment.m-off { transition: none; }
 [data-morph] .math g { transform-box: view-box; transform-origin: 0 0; }
 [data-morph][data-scene] .m-dim { opacity: 0.25; }
 `;
@@ -112,7 +112,7 @@
   function fadeRest(slide, node, moved) {
     if (moved.has(node)) return;
     if (![...moved].some((m) => node.contains(m))) {
-      play(slide, node, [{ opacity: 0 }, { opacity: 1 }], { duration: FADE, delay: LATE, fill: 'backwards', easing: 'ease-out' });
+      play(slide, node, [{ opacity: 0 }, { opacity: 1 }], { duration: moved.size ? FADE : 400, delay: moved.size ? LATE : 0, fill: 'backwards', easing: 'ease-out' });
       return;
     }
     for (const child of node.children) fadeRest(slide, child, moved);
@@ -205,6 +205,6 @@
   deck.on('fragmenthidden', step);
   deck.on('slidechanged', (ev) => show(ev.currentSlide, false));
   deck.on('ready', () => typeset().then(all));
-  deck.on('pdf-ready', () => typeset().then(all));
+  deck.on('pdf-ready', () => typeset().then(all).then(() => window.Beeson?.refreshChrome?.()));
   if (deck.isReady()) typeset().then(all);
 })();
