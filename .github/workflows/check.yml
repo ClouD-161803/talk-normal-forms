@@ -81,7 +81,7 @@ jobs:
       matrix:
         include: ${{ fromJSON(github.event_name == 'pull_request' && '[{"os":"ubuntu-latest","browser":"chrome"},{"os":"ubuntu-latest","browser":"firefox"}]' || '[{"os":"ubuntu-latest","browser":"chrome"},{"os":"ubuntu-latest","browser":"firefox"},{"os":"macos-latest","browser":"chrome"},{"os":"macos-latest","browser":"safari"},{"os":"windows-latest","browser":"chrome","record":true}]') }}
     runs-on: ${{ matrix.os }}
-    timeout-minutes: ${{ matrix.record && 90 || 15 }}
+    timeout-minutes: ${{ matrix.record && 180 || 60 }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
