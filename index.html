@@ -56,6 +56,14 @@ html.reveal-print .reveal .slides section .z-overlay > .z-axis > .z-osc { animat
 :root, html[data-theme="dark"] { --yellow: #e0b01c; }
 html[data-theme="light"] { --yellow: #8f6a00; }
 .reveal .tone-yellow { color: var(--yellow); }
+.reveal .slides section .models { color: var(--muted); }
+.reveal .slides section .models span { transition: color 400ms ease-out, opacity 400ms ease-out; }
+.reveal .slides section .models .model-cr3bp, .reveal .slides section .models .hl-accent { color: var(--text) !important; }
+.reveal .slides section .models:has(.hl-accent) .model-cr3bp { color: var(--muted) !important; }
+.reveal .slides section:not([data-complete]) .models .fragment.visible:not(.current-fragment) { opacity: 1; }
+.reveal .slides section .continuation-map { width: 780px; height: 416px; margin: 0 0 6px; }
+.reveal .slides section .homotopy { display: flex; align-items: baseline; gap: 40px; }
+.reveal .slides section .homotopy > * { margin: 0; }
 
 .reveal .slides section.stab-slide { padding: 120px 120px 0 120px; }
   .reveal .slides section.stab-slide > h2 { margin: 0 0 26px; max-width: 1400px; }
@@ -1371,6 +1379,71 @@ For questions:
   <div class="backdrop" data-backdrop="tori" data-tori="0.18"></div>
 </section>
 
+<section>
+  <h2 style="width: 1253px">Continuation: CR3BP to Richer Models</h2>
+  <div class="homotopy">
+    <div class="math" style="width: 520px">\[H = H_0 + \class{tone-yellow}{\Delta H(t;\,\varepsilon)}\]</div>
+    <p class="fragment" data-fragment-index="1" style="width: 900px">\(\Delta H(\cdot;0) = 0 \implies\) homotopy continuation</p>
+  </div>
+  <p class="models" style="width: 1129px"><span class="model-cr3bp">CR3BP</span><span class="fragment" data-fragment-index="2"> › <span class="model-er3bp">ER3BP</span></span><span class="fragment" data-fragment-index="3"> › <span class="model-bcr4bp">BCR4BP</span></span><span class="fragment" data-fragment-index="4"> › ... › <span class="model-hfem">HFEM</span></span></p>
+  <div class="continuation-map" data-view="0.91 0 0.27">
+    <span class="label" data-lab="L1">\(\LL{1}\)</span>
+    <span class="label" data-lab="m2">\(m_2\)</span>
+    <span class="label" data-lab="map">stroboscopic map</span>
+    <span class="label" data-lab="map-x">\(x\)</span>
+    <span class="label" data-lab="map-v">\(\dot x\)</span>
+  </div>
+  <div class="r-stack">
+    <div class="fragment" data-fragment-index="2" data-cr3bp-stage="elliptic" data-highlight="model-er3bp">
+      <div class="math" style="width: 1129px">\[\Delta H = \frac{\class{tone-yellow}{e}\cos\theta}{1 + \class{tone-yellow}{e}\cos\theta}\left(\tfrac{1}{2}\lVert\vb q\rVert_2^2 + \frac{1-\mu}{\rho_1} + \frac{\mu}{\rho_2}\right), \quad \class{tone-yellow}{\varepsilon = e} \in [0,\, 0.0549]\]</div>
+    </div>
+    <div class="fragment" data-fragment-index="3" data-keep data-cr3bp-stage="bicircular" data-highlight="model-bcr4bp" data-unhighlight="model-er3bp">
+      <div class="math" style="width: 1129px">\[\Delta H = \class{tone-yellow}{\varepsilon}\left[-\frac{m_s}{\rho_s} + \frac{m_s}{a_s^2}\left(x\cos\theta_S + y\sin\theta_S\right)\right], \quad \class{tone-yellow}{\varepsilon} \in [0,\, 1]\]</div>
+    </div>
+  </div>
+  <div class="figure-box cr3bp-frame" data-mu="0.01215" data-turn="3" data-stage="forced" data-ramp="3" data-dial="2.9 0 1.7" style="translate: -200px 70px; scale: 0.85">
+    <span class="label" data-lab="x">\(x\)</span>
+    <span class="label" data-lab="y">\(y\)</span>
+    <span class="label" data-lab="m1">\(m_1\)</span>
+    <span class="label" data-lab="m2">\(m_2\)</span>
+    <span class="label" data-lab="L1">\(\LL{1}\)</span>
+    <span class="label" data-lab="L2">\(\LL{2}\)</span>
+    <span class="label" data-lab="L3">\(\LL{3}\)</span>
+    <span class="label" data-lab="L4">\(\LL{4}\)</span>
+    <span class="label" data-lab="L5">\(\LL{5}\)</span>
+    <span class="label" data-lab="theta">\(\theta\)</span>
+    <span class="label" data-lab="thetaS">\(\theta_S\)</span>
+    <span class="label" data-lab="sun">Sun</span>
+    <span class="label" data-lab="drawn-e">Eccentricity perturbation<br>exaggerated</span>
+    <span class="label" data-lab="drawn">Sun perturbation<br>exaggerated</span>
+  </div>
+  <aside class="notes">Main point is that DS change when moving up the model ladder: some disappear, like C. Some change.<br><br>System loses autnomy and becomes time-periodic (over 2pi for ER3BP, synodic month for BCR4BP)<br><br>Under ER3BP L1 lyapunov becomes a torus. Libration points stay, shifting with eccentricity. <br><br>Under BCR4BP L1 itself becomes a PO, L1 lyapunov a torus.<br><br>If asked: “what happens to other libration points under BCR4BP?”:<br>1. L1 becomes a PO<br>2. L2 disappears<br>3. L3 becomes a PO<br>4. 5. L4/L5 have one PO substitute (PO1, unstable), plus two stable far away periodic orbits (PO2, PO3)<br><br>HFEM stands for High Fidelity Ephemeris Model<br><br>Segway into next slide by saying we have all the above in pydylan<br><br>Lyapunov to Halo bifurcation is in the appendix if you want to discuss bifurcations.</aside>
+</section>
+
+<section class="wide">
+  <div class="figure-box">
+    <img class="for-dark" src="figures/bicircular-substitutes-collinear-dark.png" data-pdf="figures/bicircular-substitutes-collinear.pdf" alt="The periodic orbits that replace L1, L2, and L3 as the Sun is switched on">
+    <img class="for-light" src="figures/bicircular-substitutes-collinear-light.png" data-pdf="figures/bicircular-substitutes-collinear.pdf" alt="The periodic orbits that replace L1, L2, and L3 as the Sun is switched on">
+  </div>
+  <aside class="notes">DyLAN, DYLAN-188. Continuation in epsilon from the CR3BP, epsilon = 0, to the bicircular model, epsilon = 1. L1 and L3 become periodic orbits of the period of the Sun. The family of L2 folds at epsilon = 0.0699, hence L2 has no substitute in the bicircular model.</aside>
+</section>
+
+<section class="wide">
+  <div class="figure-box">
+    <img class="for-dark" src="figures/bicircular-substitutes-triangular-dark.png" data-pdf="figures/bicircular-substitutes-triangular.pdf" alt="The three periodic orbits near L4 at epsilon = 1, and their continuation">
+    <img class="for-light" src="figures/bicircular-substitutes-triangular-light.png" data-pdf="figures/bicircular-substitutes-triangular.pdf" alt="The three periodic orbits near L4 at epsilon = 1, and their continuation">
+  </div>
+  <aside class="notes">DyLAN, DYLAN-188. Near L4, three periodic orbits are left at epsilon = 1. The continuation from L4 ends on PO3, which is stable and far from L4. PO1, the substitute, is unstable and close to L4, and it is born with the stable PO2 at a fold near epsilon = 0.9. L5 is the same by symmetry.</aside>
+</section>
+
+<section class="wide">
+  <div class="figure-box">
+    <img class="for-dark" src="figures/bicircular-substitutes-sizes-dark.png" data-pdf="figures/bicircular-substitutes-sizes.pdf" alt="The largest distance of each substitute from its libration point against epsilon">
+    <img class="for-light" src="figures/bicircular-substitutes-sizes-light.png" data-pdf="figures/bicircular-substitutes-sizes.pdf" alt="The largest distance of each substitute from its libration point against epsilon">
+  </div>
+  <aside class="notes">DyLAN, DYLAN-188. The size of each family as the Sun is switched on. The orbits of L1 and L3 stay within 0.01, about 4000 km. The orbits from L4 and L5 to PO3 grow to 0.4.</aside>
+</section>
+
 <section class="figure">
   <h2>Tori of the bicircular model near \(\mathcal{L}_{5}\)</h2>
   <div class="plate">
@@ -1445,20 +1518,24 @@ For questions:
   <div class="figure-box">
     <div class="r-stack">
       <div>
-        <img class="for-dark" src="figures/bicircular-l1-convergence-dark.png" data-pdf="figures/bicircular-l1-convergence.pdf" alt="Radius of convergence of the reduction about the L1 substitute against the degree">
-        <img class="for-light" src="figures/bicircular-l1-convergence-light.png" data-pdf="figures/bicircular-l1-convergence.pdf" alt="Radius of convergence of the reduction about the L1 substitute against the degree">
-      </div>
-      <div class="fragment" data-fragment-index="1">
         <img class="for-dark" src="figures/bicircular-l1-section-p2-dark.png" data-pdf="figures/bicircular-l1-section-p2.pdf" alt="Sections p2 = 0 of the reduced Hamiltonian at degree 12, at four energies">
         <img class="for-light" src="figures/bicircular-l1-section-p2-light.png" data-pdf="figures/bicircular-l1-section-p2.pdf" alt="Sections p2 = 0 of the reduced Hamiltonian at degree 12, at four energies">
       </div>
-      <div class="fragment" data-fragment-index="2">
+      <div class="fragment" data-fragment-index="1">
         <img class="for-dark" src="figures/bicircular-l1-section-dark.png" data-pdf="figures/bicircular-l1-section.pdf" alt="Vertical section of the reduced Hamiltonian at degree 12">
         <img class="for-light" src="figures/bicircular-l1-section-light.png" data-pdf="figures/bicircular-l1-section.pdf" alt="Vertical section of the reduced Hamiltonian at degree 12">
       </div>
     </div>
   </div>
-  <aside class="notes">Draft. Left: with the angle of the Sun kept as a variable, the phase-dependent normal form keeps its radius near 1 up to degree 16, and the phase-independent one drops after degree 12. Right: the section of the reduced Hamiltonian at four energies, with the halo pitchfork as in the CR3BP. Caption, moved from the slide: Left: radius of convergence, Fig. 3 of Jorba et al. 2020. Right: a section at degree 12, Fig. 5. Step 1: the section p_2 = 0 at degree 12, at h = 0.2, 0.5, 0.7, and 0.9, with the elliptic fixed points of the planar Lyapunov orbits, Fig. 4 of Jorba et al. 2020. Step 2: the vertical section, Fig. 5. Heading, moved from the slide: At the substitute of \(\mathcal{L}_{1}\).</aside>
+  <aside class="notes">Sections of the reduced Hamiltonian about the substitute of \(\mathcal{L}_{1}\) at degree 12, at h = 0.2, 0.5, 0.7, and 0.9. First the section p_2 = 0, with the elliptic fixed points of the planar Lyapunov orbits, Fig. 4 of Jorba et al. 2020. Step 1: the vertical section, with the halo pitchfork as in the CR3BP, Fig. 5. Heading: Sections at the substitute of \(\mathcal{L}_{1}\).</aside>
+</section>
+
+<section class="wide">
+  <div class="figure-box">
+    <img class="for-dark" src="figures/bicircular-l1-convergence-dark.png" data-pdf="figures/bicircular-l1-convergence.pdf" alt="Radius of convergence of the reduction about the L1 substitute against the degree">
+    <img class="for-light" src="figures/bicircular-l1-convergence-light.png" data-pdf="figures/bicircular-l1-convergence.pdf" alt="Radius of convergence of the reduction about the L1 substitute against the degree">
+  </div>
+  <aside class="notes">Draft. Left: with the angle of the Sun kept as a variable, the phase-dependent normal form keeps its radius near 1 up to degree 16, and the phase-independent one drops after degree 12. Caption, moved from the slide: radius of convergence, Fig. 3 of Jorba et al. 2020. The two sections at degree 12 are on the slide after the recipe. Heading, moved from the slide: At the substitute of \(\mathcal{L}_{1}\).</aside>
 </section>
 
 <section class="wide">
@@ -1766,6 +1843,8 @@ For questions:
 Beeson.start({});
 </script>
 <script src="demos/cr3bp-frame/cr3bp-frame.js"></script>
+<script src="demos/continuation-map/data.js"></script>
+<script src="demos/continuation-map/continuation-map.js"></script>
 <script src="demos/morph/morph.js"></script>
 <script src="demos/legendre-slider/legendre-slider.js"></script>
 <script src="demos/families/families.js"></script>
