@@ -665,7 +665,7 @@ export class Bundle {
     if (this.rate && !this.dragging() && now > this.resume) this.azimuth += dt * this.rate;
     if (this.flowing) {
       this.elapsed = Math.max(0, now - this.lapStart);
-      if (this.elapsed > LAP) this.fill = Math.max(this.fill, Math.min(1, (this.elapsed - LAP) / FILL));
+      if (this.elapsed > LAP) this.fill = Math.min(1, this.fill + (1000 * dt) / FILL);
     }
     const arrow = this.nudged ? 1 : 0, da = (1000 * dt) / FADE;
     this.arrow = arrow > this.arrow ? Math.min(arrow, this.arrow + da) : Math.max(arrow, this.arrow - da);

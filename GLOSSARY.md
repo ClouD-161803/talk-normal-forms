@@ -12,11 +12,19 @@ The editor shows the deck between the navigator at its left and the inspector at
 
 A session is one run of the edit command on one talk folder. It has one host, who started it, and any number of guests, who joined through its link. A guest on another network reaches the edit command through a relay. Every person of a session edits the same deck, and the edit command keeps its states as versions. A comment belongs to one thread, and a thread belongs to one element or one slide.
 
+## Allow
+
+To let `npm run check` pass a slide with a named problem of writing, i.e. long speaker notes, a heading out of its place, an element copied or moved between two steps, or words off the slide, with `data-allow` on the slide. The check still lists the slide.
+
 ## Animated plot
 
 A 2D figure on a slide that is played as an animation, drawn from the JSON data written next to it, with one or more plot panels.
 
 Avoid "chart", and avoid "graph" for a plot. The class of an animated plot is `plot`.
+
+## Appendix
+
+The slides after the closing slide, numbered A1, A2, and so on. Each section slide in the appendix opens a section of the appendix, lettered A, B, C in the order of the deck, and its label, e.g. Appendix A, is drawn by the theme above its heading.
 
 ## Attach
 
@@ -54,7 +62,7 @@ Avoid "references file", and avoid "library" for the bibliography.
 
 Words framed by a thin rounded box in their own color, over a faint tint of it, e.g. "open problem" in a cell of a table. It is the class `boxed` on a `span`.
 
-Avoid "badge", which is the count of the threads of an element, and avoid "chip" and "pill".
+Avoid "badge", which is the count of the threads of an element, "chip", which is a tile of the editor, and "pill".
 
 ## Built-in backdrop
 
@@ -103,6 +111,12 @@ The seconds between the click of a step and the moment an element is shown, as t
 A window of the editor that is shown over the deck to ask a question or to give a message, until it is answered or closed.
 
 Avoid "card". The heading over the scrubber of the progress line is not a card either, and its class is `scrub-heading`.
+
+## Draft
+
+A slide that is not finished yet, written with `data-draft` and drawn with the chip Draft in the editor. A draft is presented, printed, and exported as any other slide.
+
+Avoid "draft" for the unsaved edits kept in the storage of the browser, and "badge" for the chip of a draft, since a badge counts the threads of comments.
 
 ## Edit command
 
@@ -402,7 +416,7 @@ The name of a section, drawn at the top of each slide of the section, written wi
 
 ## Scrubber
 
-A line of progress with ticks, on which a place is chosen with the pointer. The scrubber of a show is its progress line, magnified into a band while it is open. A tick is the place of a numbered slide on the band. The name of a section is the text of its running head, and the name of the closing slide is its heading, both written over the ticks. The scrubber of an animated plot is the line under the plot, with a tick at each event.
+A line of progress with ticks, on which a place is chosen with the pointer. The scrubber of a show is its progress line, magnified into a band while it is open. A tick is the place of a numbered slide on the band. The name of a section is the text of its running head, the name of a section of the appendix is its letter and its running head after the label, e.g. A: Convergence proofs, and the name of the closing slide is its heading, all written over the ticks. The scrubber of an animated plot is the line under the plot, with a tick at each event.
 
 ## Session
 
