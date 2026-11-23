@@ -1016,7 +1016,7 @@ For questions:
     <p>Step 5: If everything we keep depends on the actions only, Hamilton's equations give I constant and phi growing linearly at the frequency omega(I). Each level set of the actions is an invariant torus, and the flow on it is a straight line on the square of angles, glued at its edges. This is Liouville-Arnold.</p>
     <p>For questions:
     - Rational vs irrational frequencies: if omega_2/omega_3 is irrational, each orbit fills its torus densely, a Lissajous orbit; if it is rational, the orbit closes, a periodic orbit. Near a rational ratio, the divisor of a monomial k_q, k_p is j times the dot product of k_p - k_q with omega, which is minus the phase rate of the monomial along the flow, and goes to zero: these are the small divisors.
-    - What about the saddle pair? I_1 = q_1 p_1 is real, its level sets are hyperbolas, not circles, and there is no angle. That is why at L1 to L3 we keep the saddle out of the full normal form, as the next slide shows.
+    - What about the saddle pair? I_1 = q_1 p_1 is real, its level sets are hyperbolas, not circles, and there is no angle. We keep I_1 in the full normal form like the other actions, so the form also describes the motion near the center manifold. In the reduction to the center manifold we drop it and restrict to q_1 = p_1 = 0.
     - Why complexify at all? In q, p the homological operator is diagonal, so each coefficient of G_d is a single division. In x, y it would couple pairs of monomials.
     - Are the actions real in the complex coordinates? Yes once we realify: I_i = j q_i p_i, which is real on the real section.
     - Where does omega_i come from? From the linearization at the point, through c_2 of the Legendre expansion of the potential.</p>
@@ -1388,7 +1388,7 @@ For questions:
     <img class="for-light" src="figures/l3-stable-region-light.png" data-pdf="figures/l3-stable-region.pdf" alt="Points at rest on the manifolds of the L3 Lyapunov family over the stable region near L5">
   </div>
   <div class="shape fill-ground no-outline fragment fade-out" style="width: 809px; height: 784px; translate: 902px 162px" data-fragment-index="1"></div>
-  <aside class="notes">Draft. On the lattice of 0.001, 2393 starts stay 1000 revolutions, against 2398 in the book, and 2336 stay 10 000. In the fine band, about 39 200 of 171 900 starts stay 10 000 (39 203 here, 39 255 on Della). None of the 2882 manifold points lands on a start that stays 10 000 revolutions: the manifolds wind around the stable set and do not enter it. This is the boundary in the CR3BP. Next, the Sun is added. Caption, moved from the slide: Starts at rest, by the revolutions of the Moon they stay. After Gómez et al. 2001, Figs. C.2 and C.3. Heading, moved from the slide: \(\mathcal{L}_{3}\) manifolds around the stable region.</aside>
+  <aside class="notes">Draft. On the lattice of 0.001, 2393 starts stay 1000 revolutions, against 2398 in the book, and 2336 stay 10 000. In the fine band, about 39 200 of 171 900 starts stay 10 000 (39 203 here, 39 255 on Della). None of the 2882 manifold points inside the fine band, of 32 000, lands on a start that stays 10 000 revolutions, and 4 land on starts that stay 1000 but not 10 000. In the planar problem, the computed part of the manifolds, about 25 revolutions long, wraps the region that survives 10 000 revolutions, as conjectured in the book. Next, the Sun is added. Caption, moved from the slide: Starts at rest, by the revolutions of the Moon they stay. After Gómez et al. 2001, Figs. C.2 and C.3. Heading, moved from the slide: \(\mathcal{L}_{3}\) manifolds around the stable region.</aside>
 </section>
 
 <section class="section" data-run="Time-periodic model">
@@ -1640,7 +1640,7 @@ For questions:
   <div class="shape fill-ground no-outline fragment fade-out" style="width: 421px; height: 78px; translate: 862px 863px" data-fragment-index="1"></div>
   <div class="shape fill-ground no-outline fragment fade-out" style="width: 494px; height: 616px; translate: 1264px 267px" data-fragment-index="2"></div>
   <div class="shape fill-ground no-outline fragment fade-out" style="width: 394px; height: 81px; translate: 1378px 861px" data-fragment-index="2"></div>
-  <aside class="notes">Draft. Steps 1 and 2: the remaining panels. Medians at one period: STM 78.8 km, flow of H2 387 m, normal form at L1 36 m, normal form at the orbit 1.1 mm. Caption, moved from the slide: Earth–Moon, \(C = 3.17837\), 1000 members, \(\sigma = 10^{-5}\), one period of 11.8 days. Heading, moved from the slide: A Gaussian cloud at a Lyapunov orbit.</aside>
+  <aside class="notes">Draft. Steps 1 and 2: the remaining panels. Medians at one period: STM 78.8 km, flow of H2 387 m, normal form at L1 36 m, normal form at the orbit about a millimeter, the floor of the RK54 reference, reached at N = 14 and 16 too. Caption, moved from the slide: Earth–Moon, \(C = 3.17837\), 1000 members, \(\sigma = 10^{-5}\), one period of 11.8 days. Heading, moved from the slide: A Gaussian cloud at a Lyapunov orbit.</aside>
 </section>
 
 <section class="wide">
@@ -1677,7 +1677,7 @@ For questions:
       </div>
     </div>
   </div>
-  <aside class="notes">Draft. The normal form at the orbit holds to 0.01 DU from the orbit, about 3800 km. Past 0.01 DU the members are handed to RK54. Caption, moved from the slide: Left: error at one period, by distance from the orbit. Right: over one period, switching to RK54 at 0.01 DU. Steps 1 and 2: the next columns. Step 3: the error over one period, with its next columns at steps 4 and 5. Step 6: the same at the moderate orbit, C = 3.18237, for three widths of the cloud, with its next columns at steps 7 and 8. Heading, moved from the slide: The normal form holds to about 3800 km.</aside>
+  <aside class="notes">Draft. On the large orbit, the normal form at the orbit holds to 0.01 DU from the orbit, about 3800 km. On the small orbit, the first column, its error rises near 0.005 DU, and there the normal form at L1 does better: 0.45 mm against 136 m at one period for sigma = 1e-5. Past 0.01 DU the members are handed to RK54. Caption, moved from the slide: Left: error at one period, by distance from the orbit. Right: over one period, switching to RK54 at 0.01 DU. Steps 1 and 2: the next columns. Step 3: the error over one period, with its next columns at steps 4 and 5. Step 6: the same at the moderate orbit, C = 3.18237, for three widths of the cloud, with its next columns at steps 7 and 8. Heading, moved from the slide: The normal form holds to about 3800 km.</aside>
 </section>
 
 <section class="wide">
