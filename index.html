@@ -1045,7 +1045,7 @@ try {
   <aside class="notes"><br></aside>
 </section>
 
-<section>
+<section data-allow="notes">
   <h2>Motivation and outline</h2>
   <ol style="width: 1680px">
     <li class="fragment" data-fragment-index="1">What is a normal form?
@@ -1073,7 +1073,7 @@ try {
   </div>
 </section>
 
-<section class="narrow lin-stab" data-timing="140">
+<section data-allow="move" class="narrow lin-stab" data-timing="140">
   <h2 style="width: 1680px">Further motivation: CR3BP linear stability</h2>
   <p>Near-equilibrium CR3BP dynamics:</p>
   <div class="math fragment" data-fragment-index="1" data-plot-show="quiver-saddle">\[\delta\dot{\vb x} = \vb A\,\delta\vb x, \qquad \vb A = \vb D\vb f(\vb x_{\mathcal{L}_1}).\]</div>
@@ -1199,7 +1199,7 @@ try {
   <div class="figure-box family" data-family="normal-form"></div>
 </section>
 
-<section class="wide" id="cr3bp-dynamics" data-morph data-timing="100">
+<section data-allow="copy move" class="wide" id="cr3bp-dynamics" data-morph data-timing="100">
   <h2 class="fragment" data-fragment-index="1">CR3BP dynamics</h2>
   <p class="fragment current-visible k-lead" data-fragment-index="1" style="translate: 120px 215px">From my last talk, the equations of motion are:</p>
   <p class="fragment current-visible k-lead" data-fragment-index="2" style="translate: 120px 215px">From my last talk, the equations of motion are:</p>
@@ -1362,7 +1362,7 @@ try {
   <aside class="notes">when blue box appears:<br><br>”You might say: you got lucky that p did not have the same coefficient on both sides of the equation”</aside>
 </section>
 
-<section class="wide nf-theorem" data-morph data-timing="110">
+<section data-allow="copy" class="wide nf-theorem" data-morph data-timing="110">
   <h2>Normal form theorem</h2>
 
   <div class="nft-wrap">
@@ -1590,7 +1590,7 @@ try {
   <aside class="notes">Coefficients per degree, vector field over Hamiltonian: n(s+1)/(n+s), tending to n = 6. 2.25 at s = 2, 4.6 at s = 15. 4.4 in total up to s = 15.</aside>
 </section>
 
-<section class="wide nf-recipe" data-timing="70">
+<section data-allow="notes" class="wide nf-recipe" data-timing="70">
   <h2>Normal form: general algorithm</h2>
   <ol start="0" style="width: 1530px; translate: -5px 0px">
     <li class="fragment" data-fragment-index="0"><span class="recipe-step-0"></span>Select dynamics \(\rightarrow\) select invariant object \(\rightarrow\) select normal form type.</li>
@@ -1774,7 +1774,7 @@ try {
   <div class="backdrop" data-backdrop="poincare" data-system="sun-earth-l1" style="translate: -142px 0px; width: 1022px; height: 1080px" data-cx="-0.004" data-cy="0.026" data-half="1.339"></div>
 </section>
 
-<section class="wide nf-flow" data-timing="90">
+<section data-allow="copy" class="wide nf-flow" data-timing="90">
   <h2>Normal form at an equilibrium point</h2>
   <div class="tikz" data-figure="nf-flow-eq" style="width: 1680px; height: 440px">
     <span class="fragment" data-part="dyn" data-fragment-index="1"></span>
@@ -1962,7 +1962,7 @@ Phi_inverse = nf.<span class="hljs-title">get_complex_inverse_map</span>()</code
   <div class="backdrop" data-backdrop="poincare" data-system="bicircular-l1-vertical" style="translate: -107px 0px; width: 987px; height: 1080px" data-cx="-0.033" data-cy="0.022" data-half="1.13"></div>
 </section>
 
-<section>
+<section data-allow="notes">
   <h2 style="width: 1253px">Continuation: CR3BP to Richer Models</h2>
   <div class="homotopy">
     <div class="math" style="width: 520px">\[H = H_{\mathrm{CR3BP}} + \class{tone-yellow}{\Delta H(t;\,\varepsilon)}\]</div>
@@ -2033,7 +2033,7 @@ Phi_inverse = nf.<span class="hljs-title">get_complex_inverse_map</span>()</code
 </section>
 
 
-<section class="wide nf-flow" data-timing="90">
+<section data-allow="copy" class="wide nf-flow" data-timing="90">
   <h2>Normal form at a periodic orbit of the BCR4BP</h2>
   <div class="tikz" data-figure="nf-flow-tp" style="width: 1680px; height: 440px">
     <span class="fragment" data-part="dyn" data-fragment-index="1"></span>
@@ -2273,7 +2273,7 @@ chart = <span class="hljs-type">normal_forms</span>.<span class="hljs-type">Peri
   </div>
 </section>
 
-<section class="figure s-to-z">
+<section data-allow="heading" class="figure s-to-z">
   <h2>Complex domains</h2>
   <div class="plate">
 <tycho-viewer minimal="slide" theme="dark">
@@ -2319,7 +2319,7 @@ chart = <span class="hljs-type">normal_forms</span>.<span class="hljs-type">Peri
   <aside class="notes">c_2 near 4 at L1 and L2 for small μ, larger at L1 and smaller at L2 as μ grows, near 1 at L3. Markers: Sun–Earth, Sun–Jupiter, Earth–Moon, Pluto–Charon.</aside>
 </section>
 
-<section class="floquet" data-timing="150">
+<section data-allow="notes" class="floquet" data-timing="150">
   <h2>Periodic orbit stability: PCR3BP</h2>
   <div class="rederive">
     <div class="fragment fade-out" data-fragment-index="5">
@@ -2381,7 +2381,7 @@ chart = <span class="hljs-type">normal_forms</span>.<span class="hljs-type">Peri
   </div>
 </section>
 
-<section class="wide nf-flow" data-timing="90">
+<section data-allow="copy" class="wide nf-flow" data-timing="90">
   <h2>Normal form at an orbit of the CR3BP</h2>
   <div class="tikz" data-figure="nf-flow-po" style="width: 1680px; height: 440px">
     <span class="fragment" data-part="dyn" data-fragment-index="1"></span>
